@@ -320,3 +320,71 @@ export async function getExpenseCategories(db: SQLiteDatabase, month: string) {
     month
   );
 }
+
+export async function createBackupData(db: SQLiteDatabase) {
+  const [profile, accounts, transactions, budgets, goals, recurringRules, debts] = await Promise.all([
+    db.getAllAsync("SELECT * FROM profile"),
+    db.getAllAsync("SELECT * FROM accounts ORDER BY id"),
+    db.getAllAsync("SELECT * FROM transactions ORDER BY id"),
+    db.getAllAsync("SELECT * FROM budgets ORDER BY id"),
+    db.getAllAsync("SELECT * FROM goals ORDER BY id"),
+    db.getAllAsync("SELECT * FROM recurring_rules ORDER BY id"),
+    db.getAllAsync("SELECT * FROM debts ORDER BY id")
+  ]);
+  return {
+    app: "Mon Équilibre",
+    schemaVersion: 1,
+    exportedAt: new Date().toISOString(),
+    data: { profile, accounts, transactions, budgets, goals, recurringRules, debts }
+  };
+}
+
+export async function restoreBackupData(db: SQLiteDatabase, backup: any) {
+  if (!backup || backup.app !== "Mon Équilibre" || backup.schemaVersion !== 1 || !backup.data) {
+    throw new Error("Ce fichier n'est pas une sauvegarde Mon Équilibre reconnue.");
+  }
+  const data = backup.data;
+  const required = ["profile", "accounts", "transactions", "budgets", "goals", "recurringRules", "debts"];
+  for (const key of required) {
+    if (!Array.isArray(data[key])) throw new Error("La sauvegarde est incomplète : " + key + ".");
+  }
+  if (data.profile.length !== 1 || data.profile[0].id !== 1) throw new Error("Le profil de la sauvegarde est invalide.");
+  await db.withExclusiveTransactionAsync(async txn => {
+    await txn.runAsync("DELETE FROM transactions");
+    await txn.runAsync("DELETE FROM budgets");
+    await txn.runAsync("DELETE FROM goals");
+    await txn.runAsync("DELETE FROM recurring_rules");
+    await txn.runAsync("DELETE FROM debts");
+    await txn.runAsync("DELETE FROM accounts");
+    await txn.runAsync("DELETE FROM profile");
+    const p = data.profile[0];
+    await txn.runAsync(
+      "INSERT INTO profile (id, display_name, country, currency, income_profile, onboarding_completed) VALUES (1, ?, ?, ?, ?, ?)",
+      p.display_name, p.country, p.currency, p.income_profile, p.onboarding_completed
+    );
+    for (const a of data.accounts) {
+      await txn.runAsync(
+        "INSERT INTO accounts (id, name, type, balance_minor, currency, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+        a.id, a.name, a.type, a.balance_minor, a.currency, a.created_at
+      );
+    }
+    for (const t of data.transactions) {
+      await txn.runAsync(
+        "INSERT INTO transactions (id, account_id, type, amount_minor, category, note, occurred_at, transfer_group) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        t.id, t.account_id, t.type, t.amount_minor, t.category, t.note, t.occurred_at, t.transfer_group
+      );
+    }
+    for (const b of data.budgets) {
+      await txn.runAsync("INSERT INTO budgets (id, category, limit_minor, month) VALUES (?, ?, ?, ?)", b.id, b.category, b.limit_minor, b.month);
+    }
+    for (const g of data.goals) {
+      await txn.runAsync("INSERT INTO goals (id, name, target_minor, current_minor, target_date, created_at) VALUES (?, ?, ?, ?, ?, ?)", g.id, g.name, g.target_minor, g.current_minor, g.target_date, g.created_at);
+    }
+    for (const r of data.recurringRules) {
+      await txn.runAsync("INSERT INTO recurring_rules (id, label, type, amount_minor, category, frequency, next_due_at, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", r.id, r.label, r.type, r.amount_minor, r.category, r.frequency, r.next_due_at, r.is_active);
+    }
+    for (const d of data.debts) {
+      await txn.runAsync("INSERT INTO debts (id, label, person, direction, total_minor, remaining_minor, due_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", d.id, d.label, d.person, d.direction, d.total_minor, d.remaining_minor, d.due_date, d.created_at);
+    }
+  });
+}
