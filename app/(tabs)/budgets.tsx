@@ -84,7 +84,7 @@ export default function Budgets() {
         return (
           <View key={item.id} style={s.budgetCard}>
             <View style={s.budgetHeader}><Text style={s.budgetName}>{item.category}</Text><Text style={[s.percentage, ratio > 1 && { color: palette.red }]}>{percentage}%</Text></View>
-            <View style={s.track}><View style={[s.fill, { width: Math.min(percentage, 100) + "%" }, ratio > 1 && { backgroundColor: palette.red }]} /></View>
+            <View style={s.track}><View style={[s.fill, { width: (Math.min(percentage, 100) + "%") as `${number}%` }, ratio > 1 && { backgroundColor: palette.red }]} /></View>
             <View style={s.budgetFooter}><Text style={s.spent}>{formatMoney(item.spentMinor, currency)} dépensés</Text><Text style={s.limitText}>sur {formatMoney(item.limitMinor, currency)}</Text></View>
             {ratio > 1 ? <Text style={s.warning}>Plafond dépassé de {formatMoney(item.spentMinor - item.limitMinor, currency)}.</Text> : <Text style={s.remaining}>Reste {formatMoney(item.limitMinor - item.spentMinor, currency)}.</Text>}
           </View>
