@@ -1,0 +1,4 @@
+import { StyleSheet,Text,View } from "react-native";
+import { palette } from "@/src/constants/theme";
+export default function Budgets(){return <View style={s.page}><Text style={s.title}>Budgets</Text><Text style={s.subtitle}>Fixez des limites adaptées à vos revenus et à vos priorités.</Text><View style={s.panel}><Text style={s.panelTitle}>Vos budgets apparaîtront ici</Text><Text style={s.body}>Les budgets seront calculés à partir des dépenses réellement enregistrées, sans compter les transferts comme des dépenses.</Text></View></View>;}
+const s=StyleSheet.create({page:{flex:1,backgroundColor:palette.background,padding:22,paddingTop:62},title:{fontSize:26,fontWeight:"800",color:palette.ink},subtitle:{color:palette.muted,marginTop:8,lineHeight:21},panel:{backgroundColor:palette.surface,borderRadius:18,padding:18,marginTop:24},panelTitle:{color:palette.ink,fontWeight:"800",fontSize:15},body:{color:palette.muted,fontSize:12,lineHeight:19,marginTop:8}});
