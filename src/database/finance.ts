@@ -13,5 +13,6 @@ export async function listRecentTransactions(db: SQLiteDatabase, limit = 8) {
   return db.getAllAsync<Transaction>("SELECT id, account_id AS accountId, type, amount_minor AS amountMinor, category, note, occurred_at AS occurredAt FROM transactions ORDER BY occurred_at DESC LIMIT ?", limit);
 }
 export function formatMoney(amountMinor: number, currency: string) {
-  return new Intl.NumberFormat("fr-FR", { style: "currency", currency, maximumFractionDigits: 0 }).format(amountMinor / 100);
+  const fractionDigits = new Intl.NumberFormat("fr-FR", { style: "currency", currency }).resolvedOptions().maximumFractionDigits;
+  return new Intl.NumberFormat("fr-FR", { style: "currency", currency, maximumFractionDigits: fractionDigits }).format(amountMinor / (10 ** fractionDigits));
 }
