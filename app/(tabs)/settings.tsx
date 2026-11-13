@@ -1,8 +1,148 @@
-import { useEffect,useState } from "react";
-import { ScrollView,StyleSheet,Text,View } from "react-native";
+import { useCallback, useState } from "react";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { getProfile } from "@/src/database/finance";
-import type { UserProfile } from "@/src/types/finance";
+import { createAccount, deleteEmptyAccount, getProfile, listAccounts, updateProfileSettings } from "@/src/database/finance";
+import { COUNTRIES } from "@/src/constants/countries";
+import type { Account, AccountType, IncomeProfile, UserProfile } from "@/src/types/finance";
 import { palette } from "@/src/constants/theme";
-export default function Settings(){const db=useSQLiteContext();const [profile,setProfile]=useState<UserProfile|null>(null);useEffect(()=>{getProfile(db).then(setProfile);},[db]);return <ScrollView style={s.page} contentContainerStyle={s.content}><Text style={s.title}>Votre profil</Text><Text style={s.subtitle}>Les réglages qui adaptent l'application à votre quotidien.</Text><View style={s.panel}><Text style={s.label}>Nom</Text><Text style={s.value}>{profile?.displayName||"Non renseigné"}</Text><Text style={s.label}>Pays</Text><Text style={s.value}>{profile?.country||"BJ"}</Text><Text style={s.label}>Devise</Text><Text style={s.value}>{profile?.currency||"XOF"}</Text><Text style={s.label}>Profil de revenus</Text><Text style={s.value}>{profile?.incomeProfile||"regular"}</Text></View><View style={s.panel}><Text style={s.panelTitle}>Confidentialité</Text><Text style={s.body}>Vos opérations sont enregistrées dans une base SQLite sur votre appareil. Aucun compte en ligne ni serveur financier n'est requis pour le fonctionnement quotidien.</Text></View></ScrollView>;}
-const s=StyleSheet.create({page:{flex:1,backgroundColor:palette.background},content:{padding:22,paddingTop:62,paddingBottom:40},title:{fontSize:26,fontWeight:"800",color:palette.ink},subtitle:{color:palette.muted,marginTop:8,lineHeight:21},panel:{backgroundColor:palette.surface,borderRadius:18,padding:18,marginTop:20},label:{color:palette.muted,fontSize:11,marginTop:12},value:{color:palette.ink,fontSize:14,fontWeight:"700",marginTop:4},panelTitle:{color:palette.ink,fontWeight:"800",fontSize:15},body:{color:palette.muted,fontSize:12,lineHeight:19,marginTop:8}});
+
+const incomeOptions: { value: IncomeProfile; label: string }[] = [
+  { value: "regular", label: "Revenus réguliers" },
+  { value: "irregular", label: "Revenus variables" },
+  { value: "multiple", label: "Plusieurs sources" },
+  { value: "none", label: "Pas de revenu personnel" }
+];
+const accountOptions: { value: AccountType; label: string }[] = [
+  { value: "cash", label: "Espèces" },
+  { value: "bank", label: "Banque" },
+  { value: "mobile_money", label: "Mobile Money" },
+  { value: "savings", label: "Épargne" },
+  { value: "other", label: "Autre" }
+];
+
+export default function Settings() {
+  const db = useSQLiteContext();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [name, setName] = useState("");
+  const [countryCode, setCountryCode] = useState("BJ");
+  const [incomeProfile, setIncomeProfile] = useState<IncomeProfile>("regular");
+  const [accountName, setAccountName] = useState("");
+  const [accountType, setAccountType] = useState<AccountType>("mobile_money");
+  const [saving, setSaving] = useState(false);
+
+  const refresh = useCallback(() => {
+    let active = true;
+    Promise.all([getProfile(db), listAccounts(db)]).then(([p, a]) => {
+      if (!active) return;
+      setProfile(p);
+      setAccounts(a);
+      if (p) {
+        setName(p.displayName);
+        setCountryCode(p.country);
+        setIncomeProfile(p.incomeProfile);
+      }
+    });
+    return () => { active = false; };
+  }, [db]);
+  useFocusEffect(refresh);
+
+  const selectedCountry = COUNTRIES.find(c => c.code === countryCode) ?? COUNTRIES[0];
+
+  async function saveSettings() {
+    if (!selectedCountry) return;
+    setSaving(true);
+    try {
+      await updateProfileSettings(db, { displayName: name, country: selectedCountry.code, currency: selectedCountry.currency, incomeProfile });
+      refresh();
+      Alert.alert("Profil mis à jour", "Tes préférences ont été enregistrées.");
+    } catch (error) {
+      Alert.alert("Modification refusée", error instanceof Error ? error.message : "Une erreur est survenue.");
+    } finally { setSaving(false); }
+  }
+
+  async function addAccount() {
+    if (!profile || !accountName.trim()) {
+      Alert.alert("Nom manquant", "Donne un nom à ce portefeuille.");
+      return;
+    }
+    try {
+      await createAccount(db, { name: accountName, type: accountType, currency: profile.currency });
+      setAccountName("");
+      refresh();
+    } catch (error) {
+      Alert.alert("Création impossible", error instanceof Error ? error.message : "Une erreur est survenue.");
+    }
+  }
+
+  function removeAccount(account: Account) {
+    Alert.alert("Supprimer ce portefeuille ?", account.name + " sera supprimé uniquement s'il est vide et sans historique.", [
+      { text: "Annuler", style: "cancel" },
+      { text: "Supprimer", style: "destructive", onPress: async () => {
+        try { await deleteEmptyAccount(db, account.id); refresh(); }
+        catch (error) { Alert.alert("Suppression impossible", error instanceof Error ? error.message : "Une erreur est survenue."); }
+      }}
+    ]);
+  }
+
+  return (
+    <ScrollView style={s.page} contentContainerStyle={s.content}>
+      <Text style={s.title}>Profil et portefeuilles</Text>
+      <Text style={s.subtitle}>Adapte l'application à ton pays et organise tes différents moyens de conserver ton argent.</Text>
+      <View style={s.panel}>
+        <Text style={s.panelTitle}>Informations personnelles</Text>
+        <Text style={s.label}>Nom affiché</Text>
+        <TextInput value={name} onChangeText={setName} placeholder="Ton prénom" style={s.input} />
+        <Text style={s.label}>Pays et devise</Text>
+        <View style={s.countryGrid}>
+          {COUNTRIES.map(c => <Pressable key={c.code} onPress={() => setCountryCode(c.code)} style={[s.country, countryCode === c.code && s.selected]}><Text style={s.optionText}>{c.label}</Text><Text style={s.optionHint}>{c.currency}</Text></Pressable>)}
+        </View>
+        <View style={s.currencyBox}><Text style={s.currencyText}>{selectedCountry.currency} · {selectedCountry.currencyLabel}</Text></View>
+        <Text style={s.label}>Profil de revenus</Text>
+        {incomeOptions.map(item => <Pressable key={item.value} onPress={() => setIncomeProfile(item.value)} style={[s.option, incomeProfile === item.value && s.selected]}><Text style={s.optionText}>{item.label}</Text></Pressable>)}
+        <Pressable onPress={saveSettings} disabled={saving} style={s.button}><Text style={s.buttonText}>{saving ? "Enregistrement..." : "Enregistrer le profil"}</Text></Pressable>
+      </View>
+      <View style={s.panel}>
+        <Text style={s.panelTitle}>Mes portefeuilles</Text>
+        <Text style={s.panelHint}>Espèces, banque, Mobile Money ou épargne. Chaque portefeuille garde son propre solde.</Text>
+        {accounts.map(a => <View key={a.id} style={s.accountRow}><View style={{ flex: 1 }}><Text style={s.optionText}>{a.name}</Text><Text style={s.optionHint}>{accountOptions.find(x => x.value === a.type)?.label ?? a.type} · {a.currency}</Text></View><Pressable onPress={() => removeAccount(a)} style={s.delete}><Text style={s.deleteText}>Supprimer</Text></Pressable></View>)}
+        <Text style={s.label}>Ajouter un portefeuille</Text>
+        <TextInput value={accountName} onChangeText={setAccountName} placeholder="Ex. MTN Mobile Money" style={s.input} />
+        <View style={s.countryGrid}>{accountOptions.map(item => <Pressable key={item.value} onPress={() => setAccountType(item.value)} style={[s.country, accountType === item.value && s.selected]}><Text style={s.optionText}>{item.label}</Text></Pressable>)}</View>
+        <Pressable onPress={addAccount} style={s.button}><Text style={s.buttonText}>Ajouter le portefeuille</Text></Pressable>
+      </View>
+      <View style={s.panel}>
+        <Text style={s.panelTitle}>Confidentialité et fonctionnement</Text>
+        <Text style={s.body}>Les opérations sont stockées dans une base SQLite sur cet appareil. Aucun compte en ligne ni serveur financier n'est requis pour les fonctions quotidiennes.</Text>
+        <Text style={s.body}>Si tu changes de pays et de devise après avoir commencé à enregistrer des opérations, l'application bloque le changement pour éviter de mélanger des soldes exprimés dans des monnaies différentes.</Text>
+      </View>
+    </ScrollView>
+  );
+}
+
+const s = StyleSheet.create({
+  page: { flex: 1, backgroundColor: palette.background },
+  content: { padding: 20, paddingTop: 58, paddingBottom: 40 },
+  title: { color: palette.ink, fontSize: 25, fontWeight: "800" },
+  subtitle: { color: palette.muted, fontSize: 12, lineHeight: 19, marginTop: 8 },
+  panel: { backgroundColor: palette.surface, borderRadius: 17, padding: 15, marginTop: 17 },
+  panelTitle: { color: palette.ink, fontSize: 14, fontWeight: "800" },
+  panelHint: { color: palette.muted, fontSize: 10, lineHeight: 16, marginTop: 6 },
+  label: { color: palette.ink, fontSize: 11, fontWeight: "800", marginTop: 15, marginBottom: 8 },
+  input: { backgroundColor: palette.background, borderWidth: 1, borderColor: palette.border, borderRadius: 11, padding: 12, color: palette.ink, fontSize: 12 },
+  countryGrid: { flexDirection: "row", flexWrap: "wrap", gap: 7 },
+  country: { width: "48%", borderWidth: 1, borderColor: palette.border, borderRadius: 10, padding: 10, backgroundColor: palette.background },
+  selected: { borderColor: palette.primary, backgroundColor: palette.primarySoft },
+  option: { borderWidth: 1, borderColor: palette.border, borderRadius: 10, padding: 11, marginBottom: 6, backgroundColor: palette.background },
+  optionText: { color: palette.ink, fontSize: 11, fontWeight: "700" },
+  optionHint: { color: palette.muted, fontSize: 9, marginTop: 4 },
+  currencyBox: { backgroundColor: palette.primarySoft, borderRadius: 10, padding: 11, marginTop: 10 },
+  currencyText: { color: palette.primary, fontSize: 11, fontWeight: "800" },
+  button: { backgroundColor: palette.navy, borderRadius: 11, padding: 14, alignItems: "center", marginTop: 14 },
+  buttonText: { color: "#FFFFFF", fontSize: 11, fontWeight: "800" },
+  accountRow: { flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderBottomColor: palette.border, paddingVertical: 11 },
+  delete: { paddingVertical: 7, paddingHorizontal: 9, borderRadius: 8, backgroundColor: palette.background },
+  deleteText: { color: palette.red, fontSize: 9, fontWeight: "800" },
+  body: { color: palette.muted, fontSize: 11, lineHeight: 18, marginTop: 8 }
+});
