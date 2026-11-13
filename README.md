@@ -34,11 +34,12 @@ Les deux francs CFA sont distingués : XOF pour l'Afrique de l'Ouest et XAF pour
 - Statistiques mensuelles et répartition des dépenses.
 - Export et restauration d'une sauvegarde JSON locale.
 - Paramètres du profil et gestion des portefeuilles.
-- Vérification TypeScript via GitHub Actions.
+- Vérification TypeScript et tests unitaires des conversions monétaires via GitHub Actions.
 
 ## Points encore à terminer et valider
 
 - Suivi transport : véhicules, carburant, entretien, taxi-moto et transports publics.
+- Historique des prix du carburant saisis par l'utilisateur, avec date d'application.
 - Calendrier financier local pour les échéances et dépenses à anticiper.
 - Calendrier financier plus complet, rappels et notifications locales.
 - Import de données plus robuste, tests automatisés des calculs et migrations de base de données.
