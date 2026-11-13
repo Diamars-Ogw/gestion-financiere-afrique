@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { createAccount, deleteEmptyAccount, getProfile, listAccounts, updateProfileSettings } from "@/src/database/finance";
+import { amountToMinorUnits, createAccount, deleteEmptyAccount, getProfile, listAccounts, updateProfileSettings } from "@/src/database/finance";
 import { COUNTRIES } from "@/src/constants/countries";
 import type { Account, AccountType, IncomeProfile, UserProfile } from "@/src/types/finance";
 import { palette } from "@/src/constants/theme";
@@ -29,6 +29,7 @@ export default function Settings() {
   const [countryCode, setCountryCode] = useState("BJ");
   const [incomeProfile, setIncomeProfile] = useState<IncomeProfile>("regular");
   const [accountName, setAccountName] = useState("");
+  const [openingBalance, setOpeningBalance] = useState("");
   const [accountType, setAccountType] = useState<AccountType>("mobile_money");
   const [saving, setSaving] = useState(false);
 
@@ -68,8 +69,11 @@ export default function Settings() {
       return;
     }
     try {
-      await createAccount(db, { name: accountName, type: accountType, currency: profile.currency });
+      const openingMinor = openingBalance.trim() ? amountToMinorUnits(openingBalance, profile.currency) : 0;
+      if (openingMinor === null) throw new Error("Vérifie le solde initial.");
+      await createAccount(db, { name: accountName, type: accountType, currency: profile.currency, openingBalanceMinor: openingMinor });
       setAccountName("");
+      setOpeningBalance("");
       refresh();
     } catch (error) {
       Alert.alert("Création impossible", error instanceof Error ? error.message : "Une erreur est survenue.");
@@ -109,6 +113,8 @@ export default function Settings() {
         {accounts.map(a => <View key={a.id} style={s.accountRow}><View style={{ flex: 1 }}><Text style={s.optionText}>{a.name}</Text><Text style={s.optionHint}>{accountOptions.find(x => x.value === a.type)?.label ?? a.type} · {a.currency}</Text></View><Pressable onPress={() => removeAccount(a)} style={s.delete}><Text style={s.deleteText}>Supprimer</Text></Pressable></View>)}
         <Text style={s.label}>Ajouter un portefeuille</Text>
         <TextInput value={accountName} onChangeText={setAccountName} placeholder="Ex. MTN Mobile Money" style={s.input} />
+        <Text style={s.label}>Solde actuel (facultatif, {profile?.currency})</Text>
+        <TextInput value={openingBalance} onChangeText={setOpeningBalance} placeholder="0" keyboardType="decimal-pad" style={s.input} />
         <View style={s.countryGrid}>{accountOptions.map(item => <Pressable key={item.value} onPress={() => setAccountType(item.value)} style={[s.country, accountType === item.value && s.selected]}><Text style={s.optionText}>{item.label}</Text></Pressable>)}</View>
         <Pressable onPress={addAccount} style={s.button}><Text style={s.buttonText}>Ajouter le portefeuille</Text></Pressable>
       </View>
