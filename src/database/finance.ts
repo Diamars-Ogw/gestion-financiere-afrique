@@ -1,5 +1,7 @@
 import type { SQLiteDatabase } from "expo-sqlite";
 import type { Account, Transaction, UserProfile, TransactionType } from "@/src/types/finance";
+import { amountToMinorUnits, formatMoney } from "@/src/utils/money";
+export { amountToMinorUnits, formatMoney } from "@/src/utils/money";
 
 export async function getProfile(db: SQLiteDatabase): Promise<UserProfile | null> {
   return db.getFirstAsync<UserProfile>("SELECT id, display_name AS displayName, country, currency, income_profile AS incomeProfile, onboarding_completed AS onboardingCompleted FROM profile WHERE id = 1");
@@ -84,21 +86,6 @@ export async function transferBetweenAccounts(
     await txn.runAsync("UPDATE accounts SET balance_minor = balance_minor - ? WHERE id = ?", input.amountMinor, from.id);
     await txn.runAsync("UPDATE accounts SET balance_minor = balance_minor + ? WHERE id = ?", input.amountMinor, to.id);
   });
-}
-
-export function formatMoney(amountMinor: number, currency: string) {
-  const fractionDigits = new Intl.NumberFormat("fr-FR", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2;
-  return new Intl.NumberFormat("fr-FR", { style: "currency", currency, maximumFractionDigits: fractionDigits }).format(amountMinor / (10 ** fractionDigits));
-}
-
-export function amountToMinorUnits(value: string, currency: string) {
-  const normalized = value.trim().replace(/\s/g, "").replace(",", ".");
-  const amount = Number(normalized);
-  if (!normalized || !Number.isFinite(amount) || amount <= 0) return null;
-  const digits = new Intl.NumberFormat("fr-FR", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2;
-  const factor = 10 ** digits;
-  const minor = Math.round(amount * factor);
-  return Number.isSafeInteger(minor) && minor > 0 ? minor : null;
 }
 
 export async function listBudgets(db: SQLiteDatabase, month: string) {
