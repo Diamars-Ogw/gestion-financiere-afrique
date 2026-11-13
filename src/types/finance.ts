@@ -19,3 +19,5 @@ export type TransportKind = "fuel" | "maintenance" | "public_transport" | "taxi"
 export interface Vehicle { id: number; name: string; kind: VehicleKind; fuelType: string; consumptionLPer100Km: number | null; }
 export interface TransportEntry { id: number; vehicleId: number | null; transactionId: number; kind: TransportKind; litersMilli: number | null; odometerKm: number | null; note: string | null; occurredAt: string; amountMinor: number; }
 export interface CalendarEvent { id: number; title: string; amountMinor: number | null; dueDate: string; category: string; isDone: number; }
+
+export interface FuelPrice { id: number; fuelType: string; priceMinor: number; effectiveDate: string; }
