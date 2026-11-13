@@ -351,13 +351,17 @@ export async function saveFuelPrice(db: SQLiteDatabase,input:{fuelType:string;pr
   await db.runAsync("INSERT INTO fuel_prices (fuel_type,price_minor,effective_date) VALUES (?,?,?) ON CONFLICT(fuel_type,effective_date) DO UPDATE SET price_minor=excluded.price_minor",input.fuelType.trim(),input.priceMinor,input.effectiveDate);
 }
 export async function listCalendarEvents(db: SQLiteDatabase) {
-  return db.getAllAsync<import("@/src/types/finance").CalendarEvent>("SELECT id,title,amount_minor AS amountMinor,due_date AS dueDate,category,is_done AS isDone FROM calendar_events ORDER BY is_done ASC,due_date ASC");
+  return db.getAllAsync<import("@/src/types/finance").CalendarEvent>("SELECT id,title,amount_minor AS amountMinor,due_date AS dueDate,category,is_done AS isDone,notification_id AS notificationId FROM calendar_events ORDER BY is_done ASC,due_date ASC");
 }
 export async function createCalendarEvent(db: SQLiteDatabase,input:{title:string;amountMinor?:number|null;dueDate:string;category:string}) {
   if(!input.title.trim()) throw new Error("Donne un titre à cette échéance.");
   if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.dueDate)||Number.isNaN(Date.parse(input.dueDate+"T12:00:00"))) throw new Error("Date invalide.");
   if(input.amountMinor!=null&&(!Number.isSafeInteger(input.amountMinor)||input.amountMinor<=0)) throw new Error("Montant invalide.");
-  await db.runAsync("INSERT INTO calendar_events (title,amount_minor,due_date,category) VALUES (?,?,?,?)",input.title.trim(),input.amountMinor??null,input.dueDate,input.category.trim()||"Autre");
+  const result = await db.runAsync("INSERT INTO calendar_events (title,amount_minor,due_date,category) VALUES (?,?,?,?)",input.title.trim(),input.amountMinor??null,input.dueDate,input.category.trim()||"Autre");
+  return Number(result.lastInsertRowId);
+}
+export async function setCalendarNotificationId(db: SQLiteDatabase,eventId:number,notificationId:string|null) {
+  await db.runAsync("UPDATE calendar_events SET notification_id=? WHERE id=?",notificationId,eventId);
 }
 export async function toggleCalendarEvent(db: SQLiteDatabase,eventId:number,done:boolean) {
   await db.runAsync("UPDATE calendar_events SET is_done=? WHERE id=?",done?1:0,eventId);
@@ -439,7 +443,7 @@ export async function restoreBackupData(db: SQLiteDatabase, backup: any) {
     }
     for (const v of data.vehicles) await txn.runAsync("INSERT INTO vehicles (id,name,kind,fuel_type,consumption_l_per_100km,created_at) VALUES (?,?,?,?,?,?)",v.id,v.name,v.kind,v.fuel_type,v.consumption_l_per_100km,v.created_at);
     for (const e of data.transportEntries) await txn.runAsync("INSERT INTO transport_entries (id,vehicle_id,transaction_id,kind,liters_milli,odometer_km,note,occurred_at) VALUES (?,?,?,?,?,?,?,?)",e.id,e.vehicle_id,e.transaction_id,e.kind,e.liters_milli,e.odometer_km,e.note,e.occurred_at);
-    for (const e of data.calendarEvents) await txn.runAsync("INSERT INTO calendar_events (id,title,amount_minor,due_date,category,is_done,created_at) VALUES (?,?,?,?,?,?,?)",e.id,e.title,e.amount_minor,e.due_date,e.category,e.is_done,e.created_at);
+    for (const e of data.calendarEvents) await txn.runAsync("INSERT INTO calendar_events (id,title,amount_minor,due_date,category,is_done,notification_id,created_at) VALUES (?,?,?,?,?,?,?,?)",e.id,e.title,e.amount_minor,e.due_date,e.category,e.is_done,e.notification_id??null,e.created_at);
     for (const p of data.fuelPrices) await txn.runAsync("INSERT INTO fuel_prices (id,fuel_type,price_minor,effective_date) VALUES (?,?,?,?)",p.id,p.fuel_type,p.price_minor,p.effective_date);
   });
 }
