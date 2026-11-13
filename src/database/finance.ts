@@ -339,6 +339,16 @@ export async function recordTransportExpense(db: SQLiteDatabase, input: { accoun
     await txn.runAsync("INSERT INTO transport_entries (vehicle_id,transaction_id,kind,liters_milli,odometer_km,note,occurred_at) VALUES (?,?,?,?,?,?,?)",input.vehicleId??null,Number(result.lastInsertRowId),input.kind,input.liters==null?null:Math.round(input.liters*1000),input.odometerKm??null,input.note?.trim()||null,timestamp);
   });
 }
+
+export async function listFuelPrices(db: SQLiteDatabase) {
+  return db.getAllAsync<import("@/src/types/finance").FuelPrice>("SELECT id, fuel_type AS fuelType, price_minor AS priceMinor, effective_date AS effectiveDate FROM fuel_prices ORDER BY effective_date DESC, fuel_type");
+}
+export async function saveFuelPrice(db: SQLiteDatabase,input:{fuelType:string;priceMinor:number;effectiveDate:string}) {
+  if(!input.fuelType.trim()) throw new Error("Indique le type de carburant.");
+  if(!Number.isSafeInteger(input.priceMinor)||input.priceMinor<=0) throw new Error("Prix au litre invalide.");
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.effectiveDate)||Number.isNaN(Date.parse(input.effectiveDate+"T12:00:00"))) throw new Error("Date invalide.");
+  await db.runAsync("INSERT INTO fuel_prices (fuel_type,price_minor,effective_date) VALUES (?,?,?) ON CONFLICT(fuel_type,effective_date) DO UPDATE SET price_minor=excluded.price_minor",input.fuelType.trim(),input.priceMinor,input.effectiveDate);
+}
 export async function listCalendarEvents(db: SQLiteDatabase) {
   return db.getAllAsync<import("@/src/types/finance").CalendarEvent>("SELECT id,title,amount_minor AS amountMinor,due_date AS dueDate,category,is_done AS isDone FROM calendar_events ORDER BY is_done ASC,due_date ASC");
 }
@@ -353,7 +363,7 @@ export async function toggleCalendarEvent(db: SQLiteDatabase,eventId:number,done
 }
 
 export async function createBackupData(db: SQLiteDatabase) {
-  const [profile, accounts, transactions, budgets, goals, recurringRules, debts, vehicles, transportEntries, calendarEvents] = await Promise.all([
+  const [profile, accounts, transactions, budgets, goals, recurringRules, debts, vehicles, transportEntries, calendarEvents, fuelPrices] = await Promise.all([
     db.getAllAsync("SELECT * FROM profile"),
     db.getAllAsync("SELECT * FROM accounts ORDER BY id"),
     db.getAllAsync("SELECT * FROM transactions ORDER BY id"),
@@ -369,7 +379,7 @@ export async function createBackupData(db: SQLiteDatabase) {
     app: "Mon Équilibre",
     schemaVersion: 1,
     exportedAt: new Date().toISOString(),
-    data: { profile, accounts, transactions, budgets, goals, recurringRules, debts, vehicles, transportEntries, calendarEvents }
+    data: { profile, accounts, transactions, budgets, goals, recurringRules, debts, vehicles, transportEntries, calendarEvents, fuelPrices }
   };
 }
 
@@ -379,14 +389,14 @@ export async function restoreBackupData(db: SQLiteDatabase, backup: any) {
   }
   const data = backup.data;
   const required = ["profile", "accounts", "transactions", "budgets", "goals", "recurringRules", "debts"];
-  for (const key of ["vehicles", "transportEntries", "calendarEvents"]) if (data[key] === undefined) data[key] = [];
+  for (const key of ["vehicles", "transportEntries", "calendarEvents", "fuelPrices"]) if (data[key] === undefined) data[key] = [];
   for (const key of required) {
     if (!Array.isArray(data[key])) throw new Error("La sauvegarde est incomplète : " + key + ".");
   }
   if (data.profile.length !== 1 || data.profile[0].id !== 1) throw new Error("Le profil de la sauvegarde est invalide.");
   await db.withExclusiveTransactionAsync(async txn => {
     await txn.runAsync("DELETE FROM transport_entries");
-    await txn.runAsync("DELETE FROM calendar_events");
+    await txn.runAsync("DELETE FROM calendar_events");\n    await txn.runAsync("DELETE FROM fuel_prices");
     await txn.runAsync("DELETE FROM vehicles");
     await txn.runAsync("DELETE FROM transactions");
     await txn.runAsync("DELETE FROM budgets");
@@ -426,6 +436,6 @@ export async function restoreBackupData(db: SQLiteDatabase, backup: any) {
     }
     for (const v of data.vehicles) await txn.runAsync("INSERT INTO vehicles (id,name,kind,fuel_type,consumption_l_per_100km,created_at) VALUES (?,?,?,?,?,?)",v.id,v.name,v.kind,v.fuel_type,v.consumption_l_per_100km,v.created_at);
     for (const e of data.transportEntries) await txn.runAsync("INSERT INTO transport_entries (id,vehicle_id,transaction_id,kind,liters_milli,odometer_km,note,occurred_at) VALUES (?,?,?,?,?,?,?,?)",e.id,e.vehicle_id,e.transaction_id,e.kind,e.liters_milli,e.odometer_km,e.note,e.occurred_at);
-    for (const e of data.calendarEvents) await txn.runAsync("INSERT INTO calendar_events (id,title,amount_minor,due_date,category,is_done,created_at) VALUES (?,?,?,?,?,?,?)",e.id,e.title,e.amount_minor,e.due_date,e.category,e.is_done,e.created_at);
+    for (const e of data.calendarEvents) await txn.runAsync("INSERT INTO calendar_events (id,title,amount_minor,due_date,category,is_done,created_at) VALUES (?,?,?,?,?,?,?)",e.id,e.title,e.amount_minor,e.due_date,e.category,e.is_done,e.created_at);\n    for (const p of data.fuelPrices) await txn.runAsync("INSERT INTO fuel_prices (id,fuel_type,price_minor,effective_date) VALUES (?,?,?,?)",p.id,p.fuel_type,p.price_minor,p.effective_date);
   });
 }
