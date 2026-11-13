@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { Ionicons } from "@expo/vector-icons";
 import { amountToMinorUnits, createTransaction, formatMoney, listAccounts, listRecentTransactions, transferBetweenAccounts } from "@/src/database/finance";
@@ -15,7 +15,8 @@ const categories = {
 
 export default function Transactions() {
   const db = useSQLiteContext();
-  const [mode, setMode] = useState<EntryMode>("expense");
+  const params = useLocalSearchParams<{ type?: string }>();
+  const [mode, setMode] = useState<EntryMode>(params.type === "income" ? "income" : "expense");
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [history, setHistory] = useState<Transaction[]>([]);
   const [currency, setCurrency] = useState("XOF");
@@ -25,6 +26,13 @@ export default function Transactions() {
   const [accountId, setAccountId] = useState<number | null>(null);
   const [toAccountId, setToAccountId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (params.type === "income" || params.type === "expense") {
+      setMode(params.type);
+      setCategory(categories[params.type][0]);
+    }
+  }, [params.type]);
 
   const refresh = useCallback(() => {
     let active = true;
