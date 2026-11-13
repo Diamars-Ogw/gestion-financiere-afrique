@@ -5,7 +5,7 @@ describe("currency precision", () => {
 });
 describe("amountToMinorUnits",()=>{
   it("converts zero-decimal CFA amounts",()=>{expect(amountToMinorUnits("12500","XOF")).toBe(12500);expect(amountToMinorUnits("12 500","XAF")).toBe(12500);});
-  it("converts currencies with two and three decimals exactly",()=>{expect(amountToMinorUnits("12,50","MAD")).toBe(1250);expect(amountToMinorUnits("1,275","TND")).toBe(1275);expect(amountToMinorUnits("1,005","MAD")).toBe(100);});
+  it("converts currencies with two and three decimals exactly",()=>{expect(amountToMinorUnits("12,50","MAD")).toBe(1250);expect(amountToMinorUnits("1,275","TND")).toBe(1275);expect(amountToMinorUnits("12,50","MAD")).toBe(1250);});
   it("rejects non-zero precision beyond the currency minor unit",()=>{expect(amountToMinorUnits("1,005","MAD")).toBeNull();expect(amountToMinorUnits("100,50","XOF")).toBeNull();expect(amountToMinorUnits("1,0001","TND")).toBeNull();});
   it("accepts harmless trailing zeroes beyond precision",()=>{expect(amountToMinorUnits("1,500","MAD")).toBe(150);});
   it.each(["","0","-4","abc","NaN"])("rejects invalid amount %s",value=>expect(amountToMinorUnits(value,"XOF")).toBeNull());
