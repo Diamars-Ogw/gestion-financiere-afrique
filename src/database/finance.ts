@@ -164,3 +164,42 @@ export async function contributeToGoal(db: SQLiteDatabase, input: { goalId: numb
     await txn.runAsync("UPDATE goals SET current_minor = current_minor + ? WHERE id = ?", input.amountMinor, goal.id);
   });
 }
+
+export async function updateProfileSettings(
+  db: SQLiteDatabase,
+  input: { displayName: string; country: string; currency: string; incomeProfile: import("@/src/types/finance").IncomeProfile }
+) {
+  const current = await db.getFirstAsync<{ currency: string }>("SELECT currency FROM profile WHERE id = 1");
+  if (current && current.currency !== input.currency) {
+    const activity = await db.getFirstAsync<{ transactions: number; nonZeroAccounts: number }>(
+      "SELECT (SELECT COUNT(*) FROM transactions) AS transactions, (SELECT COUNT(*) FROM accounts WHERE balance_minor != 0) AS nonZeroAccounts"
+    );
+    if ((activity?.transactions ?? 0) > 0 || (activity?.nonZeroAccounts ?? 0) > 0) {
+      throw new Error("Tu as déjà des opérations ou des soldes dans " + current.currency + ". Pour éviter de mélanger deux devises, termine d'abord une sauvegarde et une conversion sécurisée de tes soldes.");
+    }
+  }
+  await db.withExclusiveTransactionAsync(async txn => {
+    await txn.runAsync(
+      "UPDATE profile SET display_name = ?, country = ?, currency = ?, income_profile = ? WHERE id = 1",
+      input.displayName.trim(), input.country, input.currency, input.incomeProfile
+    );
+    await txn.runAsync("UPDATE accounts SET currency = ? WHERE balance_minor = 0", input.currency);
+  });
+}
+
+export async function createAccount(db: SQLiteDatabase, input: { name: string; type: import("@/src/types/finance").AccountType; currency: string }) {
+  const name = input.name.trim();
+  if (!name) throw new Error("Donne un nom au portefeuille.");
+  await db.runAsync("INSERT INTO accounts (name, type, balance_minor, currency) VALUES (?, ?, 0, ?)", name, input.type, input.currency);
+}
+
+export async function deleteEmptyAccount(db: SQLiteDatabase, accountId: number) {
+  const account = await db.getFirstAsync<{ balanceMinor: number }>(
+    "SELECT balance_minor AS balanceMinor FROM accounts WHERE id = ?", accountId
+  );
+  if (!account) return;
+  if (account.balanceMinor !== 0) throw new Error("Ce portefeuille a un solde. Transfère d'abord son argent.");
+  const tx = await db.getFirstAsync<{ count: number }>("SELECT COUNT(*) AS count FROM transactions WHERE account_id = ?", accountId);
+  if ((tx?.count ?? 0) > 0) throw new Error("Ce portefeuille possède un historique et ne peut pas être supprimé.");
+  await db.runAsync("DELETE FROM accounts WHERE id = ?", accountId);
+}
