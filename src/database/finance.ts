@@ -85,7 +85,7 @@ export async function transferBetweenAccounts(
 }
 
 export function formatMoney(amountMinor: number, currency: string) {
-  const fractionDigits = new Intl.NumberFormat("fr-FR", { style: "currency", currency }).resolvedOptions().maximumFractionDigits;
+  const fractionDigits = new Intl.NumberFormat("fr-FR", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2;
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency, maximumFractionDigits: fractionDigits }).format(amountMinor / (10 ** fractionDigits));
 }
 
