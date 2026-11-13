@@ -8,6 +8,7 @@ import { palette } from "@/src/constants/theme";
 
 const expenseCategories = ["Loyer", "Électricité", "Eau", "Internet", "Téléphone", "Scolarité", "Abonnement", "Crédit", "Autre"];
 const incomeCategories = ["Salaire", "Pension", "Loyer reçu", "Contrat", "Autre revenu"];
+function todayLocal(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 
 export default function Calendar() {
   const db = useSQLiteContext();
@@ -19,7 +20,7 @@ export default function Calendar() {
   const [type, setType] = useState<"income" | "expense">("expense");
   const [category, setCategory] = useState(expenseCategories[0]);
   const [frequency, setFrequency] = useState<RecurringFrequency>("monthly");
-  const [dueDate, setDueDate] = useState(new Date().toISOString().slice(0, 10));
+  const [dueDate, setDueDate] = useState(todayLocal());
   const [accountId, setAccountId] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
 
