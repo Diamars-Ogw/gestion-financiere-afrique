@@ -38,7 +38,8 @@ Les deux francs CFA sont distingués : XOF pour l'Afrique de l'Ouest et XAF pour
 
 ## Points encore à terminer et valider
 
-- Transport : véhicules, carburant, transports publics et entretien.
+- Suivi transport : véhicules, carburant, entretien, taxi-moto et transports publics.
+- Calendrier financier local pour les échéances et dépenses à anticiper.
 - Calendrier financier plus complet, rappels et notifications locales.
 - Import de données plus robuste, tests automatisés des calculs et migrations de base de données.
 - Tests fonctionnels sur appareils Android et iPhone.
