@@ -6,4 +6,6 @@ export default function TabLayout(){return <Tabs screenOptions={{headerShown:fal
 <Tabs.Screen name="transactions" options={{title:"Opérations",tabBarIcon:({color,size})=><Ionicons name="swap-horizontal-outline" color={color} size={size}/>}}/>
 <Tabs.Screen name="budgets" options={{title:"Budgets",tabBarIcon:({color,size})=><Ionicons name="pie-chart-outline" color={color} size={size}/>}}/>
 <Tabs.Screen name="settings" options={{title:"Profil",tabBarIcon:({color,size})=><Ionicons name="person-circle-outline" color={color} size={size}/>}}/>
+<Tabs.Screen name="transport" options={{ href: null }} />
+<Tabs.Screen name="calendar" options={{ href: null }} />
 </Tabs>;}
