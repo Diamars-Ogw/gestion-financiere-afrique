@@ -115,6 +115,7 @@ export async function createGoal(db: SQLiteDatabase, input: { name: string; targ
   const name = input.name.trim();
   if (!name) throw new Error("Donne un nom à cet objectif.");
   if (!Number.isSafeInteger(input.targetMinor) || input.targetMinor <= 0) throw new Error("Le montant cible doit être supérieur à zéro.");
+  if (input.targetDate && !isValidDateOnly(input.targetDate)) throw new Error("Date cible invalide.");
   await db.runAsync("INSERT INTO goals (name, target_minor, target_date) VALUES (?, ?, ?)", name, input.targetMinor, input.targetDate || null);
 }
 
@@ -206,6 +207,7 @@ export async function listDebts(db: SQLiteDatabase) {
 export async function createDebt(db: SQLiteDatabase, input: { label: string; person?: string; direction: import("@/src/types/finance").DebtDirection; amountMinor: number; dueDate?: string }) {
   if (!input.label.trim()) throw new Error("Donne un intitulé à cette dette.");
   if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
+  if (input.dueDate && !isValidDateOnly(input.dueDate)) throw new Error("Date d’échéance invalide.");
   await db.runAsync(
     "INSERT INTO debts (label, person, direction, total_minor, remaining_minor, due_date) VALUES (?, ?, ?, ?, ?, ?)",
     input.label.trim(), input.person?.trim() || "", input.direction, input.amountMinor, input.amountMinor, input.dueDate || null
