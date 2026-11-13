@@ -5,3 +5,5 @@ export interface UserProfile { id: number; country: string; currency: string; in
 export interface Account { id: number; name: string; type: AccountType; balanceMinor: number; currency: string; }
 export interface Transaction { id: number; accountId: number; type: TransactionType; amountMinor: number; category: string; note: string | null; occurredAt: string; }
 export interface Budget { id: number; category: string; limitMinor: number; spentMinor: number; month: string; }
+
+export interface SavingsGoal { id: number; name: string; targetMinor: number; currentMinor: number; targetDate: string | null; }
