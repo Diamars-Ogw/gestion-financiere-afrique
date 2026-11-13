@@ -12,10 +12,11 @@ export async function saveProfile(db: SQLiteDatabase, p: Pick<UserProfile, "disp
   );
 }
 
-export async function ensureDefaultAccount(db: SQLiteDatabase, currency: string) {
+export async function ensureDefaultAccount(db: SQLiteDatabase, currency: string, openingBalanceMinor = 0) {
   const existing = await db.getFirstAsync<{ id: number }>("SELECT id FROM accounts LIMIT 1");
   if (!existing) {
-    await db.runAsync("INSERT INTO accounts (name, type, balance_minor, currency) VALUES (?, ?, 0, ?)", "Espèces", "cash", currency);
+    if (!Number.isSafeInteger(openingBalanceMinor) || openingBalanceMinor < 0) throw new Error("Solde initial invalide.");
+    await db.runAsync("INSERT INTO accounts (name, type, balance_minor, currency) VALUES (?, ?, ?, ?)", "Espèces", "cash", openingBalanceMinor, currency);
   }
 }
 
@@ -46,8 +47,9 @@ export async function createTransaction(
 ) {
   if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
   await db.withExclusiveTransactionAsync(async txn => {
-    const account = await txn.getFirstAsync<{ id: number }>("SELECT id FROM accounts WHERE id = ?", input.accountId);
+    const account = await txn.getFirstAsync<{ id: number; balanceMinor: number }>("SELECT id, balance_minor AS balanceMinor FROM accounts WHERE id = ?", input.accountId);
     if (!account) throw new Error("Ce portefeuille n'existe plus.");
+    if (input.type === "expense" && account.balanceMinor < input.amountMinor) throw new Error("Solde insuffisant. Mets à jour ton solde de départ ou choisis un autre portefeuille.");
     await txn.runAsync(
       "INSERT INTO transactions (account_id, type, amount_minor, category, note, occurred_at) VALUES (?, ?, ?, ?, ?, ?)",
       input.accountId, input.type, input.amountMinor, input.category, input.note?.trim() || null, localTimestamp()
@@ -187,10 +189,12 @@ export async function updateProfileSettings(
   });
 }
 
-export async function createAccount(db: SQLiteDatabase, input: { name: string; type: import("@/src/types/finance").AccountType; currency: string }) {
+export async function createAccount(db: SQLiteDatabase, input: { name: string; type: import("@/src/types/finance").AccountType; currency: string; openingBalanceMinor?: number }) {
   const name = input.name.trim();
   if (!name) throw new Error("Donne un nom au portefeuille.");
-  await db.runAsync("INSERT INTO accounts (name, type, balance_minor, currency) VALUES (?, ?, 0, ?)", name, input.type, input.currency);
+  const opening = input.openingBalanceMinor ?? 0;
+  if (!Number.isSafeInteger(opening) || opening < 0) throw new Error("Solde initial invalide.");
+  await db.runAsync("INSERT INTO accounts (name, type, balance_minor, currency) VALUES (?, ?, ?, ?)", name, input.type, opening, input.currency);
 }
 
 export async function deleteEmptyAccount(db: SQLiteDatabase, accountId: number) {
