@@ -296,3 +296,27 @@ export async function markRecurringRulePaid(db: SQLiteDatabase, input: { ruleId:
 export async function toggleRecurringRule(db: SQLiteDatabase, ruleId: number, active: boolean) {
   await db.runAsync("UPDATE recurring_rules SET is_active = ? WHERE id = ?", active ? 1 : 0, ruleId);
 }
+
+export async function getMonthlyHistory(db: SQLiteDatabase, months = 6) {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
+  const startKey = start.getFullYear() + "-" + String(start.getMonth() + 1).padStart(2, "0");
+  const rows = await db.getAllAsync<{ month: string; income: number; expenses: number }>(
+    "SELECT substr(occurred_at, 1, 7) AS month, SUM(CASE WHEN type = 'income' THEN amount_minor ELSE 0 END) AS income, SUM(CASE WHEN type = 'expense' THEN amount_minor ELSE 0 END) AS expenses FROM transactions WHERE substr(occurred_at, 1, 7) >= ? GROUP BY substr(occurred_at, 1, 7) ORDER BY month",
+    startKey
+  );
+  const map = new Map(rows.map(x => [x.month, x]));
+  return Array.from({ length: months }, (_, index) => {
+    const date = new Date(start.getFullYear(), start.getMonth() + index, 1);
+    const key = date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0");
+    const row = map.get(key);
+    return { month: key, income: row?.income ?? 0, expenses: row?.expenses ?? 0 };
+  });
+}
+
+export async function getExpenseCategories(db: SQLiteDatabase, month: string) {
+  return db.getAllAsync<{ category: string; amountMinor: number }>(
+    "SELECT category, SUM(amount_minor) AS amountMinor FROM transactions WHERE type = 'expense' AND substr(occurred_at, 1, 7) = ? GROUP BY category ORDER BY amountMinor DESC",
+    month
+  );
+}
