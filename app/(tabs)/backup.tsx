@@ -4,6 +4,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
+import * as Notifications from "expo-notifications";
 import { createBackupData, restoreBackupData } from "@/src/database/finance";
 import { palette } from "@/src/constants/theme";
 
@@ -35,14 +36,16 @@ export default function Backup() {
       const backup = JSON.parse(await file.text());
       Alert.alert(
         "Remplacer les données actuelles ?",
-        "La restauration remplace les opérations, budgets, objectifs, échéances, dettes, véhicules et données de transport présents sur cet appareil. Fais une sauvegarde actuelle avant de continuer.",
+        "La restauration remplace les données financières actuelles. Les rappels locaux déjà programmés seront annulés et devront être recréés après la restauration. Fais une sauvegarde actuelle avant de continuer.",
         [
           { text: "Annuler", style: "cancel" },
           { text: "Restaurer", style: "destructive", onPress: async () => {
             setBusy(true);
             try {
+              const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+              for (const notification of scheduled) await Notifications.cancelScheduledNotificationAsync(notification.identifier);
               await restoreBackupData(db, backup);
-              Alert.alert("Restauration terminée", "Les données de la sauvegarde ont été restaurées sur cet appareil.");
+              Alert.alert("Restauration terminée", "Les données ont été restaurées. Les rappels locaux devront être reprogrammés.");
             } catch (error) {
               Alert.alert("Restauration impossible", error instanceof Error ? error.message : "Une erreur est survenue.");
             } finally { setBusy(false); }
