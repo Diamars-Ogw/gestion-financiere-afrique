@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Mon Équilibre",
+    "slug": "gestion-financiere-afrique",
+    "scheme": "monequilibre",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.diamars.monequilibre"
+    },
+    "android": {
+      "package": "com.diamars.monequilibre",
+      "adaptiveIcon": {
+        "backgroundColor": "#101827"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-sqlite",
+        {
+          "enableFTS": true
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
