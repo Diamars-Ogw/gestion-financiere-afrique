@@ -35,7 +35,7 @@ export default function Backup() {
       const backup = JSON.parse(await file.text());
       Alert.alert(
         "Remplacer les données actuelles ?",
-        "La restauration remplace les opérations, budgets, objectifs, échéances et dettes présents sur cet appareil. Fais une sauvegarde actuelle avant de continuer.",
+        "La restauration remplace les opérations, budgets, objectifs, échéances, dettes, véhicules et données de transport présents sur cet appareil. Fais une sauvegarde actuelle avant de continuer.",
         [
           { text: "Annuler", style: "cancel" },
           { text: "Restaurer", style: "destructive", onPress: async () => {
@@ -60,7 +60,7 @@ export default function Backup() {
       <Text style={s.subtitle}>Tes données restent sur ton téléphone. Une sauvegarde te permet de les conserver si tu changes d'appareil ou si tu réinstalles l'application.</Text>
       <View style={s.card}>
         <Text style={s.cardTitle}>Exporter une sauvegarde</Text>
-        <Text style={s.body}>Crée un fichier JSON contenant ton profil, tes portefeuilles, opérations, budgets, objectifs, échéances et dettes. Tu peux ensuite l'enregistrer dans tes fichiers ou un espace cloud de ton choix.</Text>
+        <Text style={s.body}>Crée un fichier JSON contenant ton profil, tes portefeuilles, opérations, budgets, objectifs, échéances, dettes, véhicules, dépenses de transport et historique des prix du carburant. Tu peux ensuite l'enregistrer dans tes fichiers ou un espace cloud de ton choix.</Text>
         <Pressable disabled={busy} onPress={exportBackup} style={s.button}><Text style={s.buttonText}>{busy ? "Préparation..." : "Exporter mes données"}</Text></Pressable>
       </View>
       <View style={s.card}>
