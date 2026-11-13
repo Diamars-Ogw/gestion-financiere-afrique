@@ -8,4 +8,5 @@ export default function TabLayout(){return <Tabs screenOptions={{headerShown:fal
 <Tabs.Screen name="settings" options={{title:"Profil",tabBarIcon:({color,size})=><Ionicons name="person-circle-outline" color={color} size={size}/>}}/>
 <Tabs.Screen name="transport" options={{ href: null }} />
 <Tabs.Screen name="calendar" options={{ href: null }} />
+<Tabs.Screen name="fuel-prices" options={{ href: null }} />
 </Tabs>;}
