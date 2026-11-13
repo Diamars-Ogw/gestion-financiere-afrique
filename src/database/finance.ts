@@ -203,3 +203,42 @@ export async function deleteEmptyAccount(db: SQLiteDatabase, accountId: number) 
   if ((tx?.count ?? 0) > 0) throw new Error("Ce portefeuille possède un historique et ne peut pas être supprimé.");
   await db.runAsync("DELETE FROM accounts WHERE id = ?", accountId);
 }
+
+export async function listDebts(db: SQLiteDatabase) {
+  return db.getAllAsync<import("@/src/types/finance").Debt>(
+    "SELECT id, label, person, direction, total_minor AS totalMinor, remaining_minor AS remainingMinor, due_date AS dueDate FROM debts ORDER BY CASE WHEN remaining_minor > 0 THEN 0 ELSE 1 END, id DESC"
+  );
+}
+
+export async function createDebt(db: SQLiteDatabase, input: { label: string; person?: string; direction: import("@/src/types/finance").DebtDirection; amountMinor: number; dueDate?: string }) {
+  if (!input.label.trim()) throw new Error("Donne un intitulé à cette dette.");
+  if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
+  await db.runAsync(
+    "INSERT INTO debts (label, person, direction, total_minor, remaining_minor, due_date) VALUES (?, ?, ?, ?, ?, ?)",
+    input.label.trim(), input.person?.trim() || "", input.direction, input.amountMinor, input.amountMinor, input.dueDate || null
+  );
+}
+
+export async function recordDebtPayment(db: SQLiteDatabase, input: { debtId: number; accountId: number; amountMinor: number }) {
+  if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
+  await db.withExclusiveTransactionAsync(async txn => {
+    const debt = await txn.getFirstAsync<{ id: number; label: string; direction: string; remainingMinor: number }>(
+      "SELECT id, label, direction, remaining_minor AS remainingMinor FROM debts WHERE id = ?", input.debtId
+    );
+    const account = await txn.getFirstAsync<{ id: number; currency: string; balanceMinor: number }>(
+      "SELECT id, currency, balance_minor AS balanceMinor FROM accounts WHERE id = ?", input.accountId
+    );
+    if (!debt || !account) throw new Error("La dette ou le portefeuille est introuvable.");
+    if (input.amountMinor > debt.remainingMinor) throw new Error("Le paiement dépasse le montant restant.");
+    const outgoing = debt.direction === "i_owe";
+    if (outgoing && account.balanceMinor < input.amountMinor) throw new Error("Le solde du portefeuille est insuffisant.");
+    await txn.runAsync(
+      "INSERT INTO transactions (account_id, type, amount_minor, category, note, occurred_at) VALUES (?, ?, ?, ?, ?, ?)",
+      account.id, outgoing ? "expense" : "income", input.amountMinor,
+      outgoing ? "Remboursement de dette" : "Remboursement reçu",
+      debt.label, localTimestamp()
+    );
+    await txn.runAsync("UPDATE accounts SET balance_minor = balance_minor + ? WHERE id = ?", outgoing ? -input.amountMinor : input.amountMinor, account.id);
+    await txn.runAsync("UPDATE debts SET remaining_minor = remaining_minor - ? WHERE id = ?", input.amountMinor, debt.id);
+  });
+}
