@@ -321,21 +321,64 @@ export async function getExpenseCategories(db: SQLiteDatabase, month: string) {
   );
 }
 
+
+export async function listVehicles(db: SQLiteDatabase) {
+  return db.getAllAsync<import("@/src/types/finance").Vehicle>("SELECT id, name, kind, fuel_type AS fuelType, consumption_l_per_100km AS consumptionLPer100Km FROM vehicles ORDER BY id DESC");
+}
+export async function createVehicle(db: SQLiteDatabase, input: { name: string; kind: import("@/src/types/finance").VehicleKind; fuelType: string; consumption?: number | null }) {
+  if (!input.name.trim()) throw new Error("Donne un nom au véhicule.");
+  if (input.consumption != null && (!Number.isFinite(input.consumption) || input.consumption <= 0 || input.consumption > 100)) throw new Error("Consommation invalide.");
+  await db.runAsync("INSERT INTO vehicles (name, kind, fuel_type, consumption_l_per_100km) VALUES (?, ?, ?, ?)", input.name.trim(), input.kind, input.fuelType.trim() || "unknown", input.consumption ?? null);
+}
+export async function listTransportEntries(db: SQLiteDatabase, limit = 30) {
+  return db.getAllAsync<import("@/src/types/finance").TransportEntry>("SELECT e.id, e.vehicle_id AS vehicleId, e.transaction_id AS transactionId, e.kind, e.liters_milli AS litersMilli, e.odometer_km AS odometerKm, e.note, e.occurred_at AS occurredAt, t.amount_minor AS amountMinor FROM transport_entries e JOIN transactions t ON t.id = e.transaction_id ORDER BY e.occurred_at DESC LIMIT ?", limit);
+}
+export async function recordTransportExpense(db: SQLiteDatabase, input: { accountId: number; amountMinor: number; kind: import("@/src/types/finance").TransportKind; vehicleId?: number | null; liters?: number | null; odometerKm?: number | null; note?: string }) {
+  if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
+  if (input.kind === "fuel" && (input.liters == null || !Number.isFinite(input.liters) || input.liters <= 0)) throw new Error("Indique la quantité de carburant achetée.");
+  if (input.odometerKm != null && (!Number.isSafeInteger(input.odometerKm) || input.odometerKm < 0)) throw new Error("Kilométrage invalide.");
+  await db.withExclusiveTransactionAsync(async txn => {
+    const account = await txn.getFirstAsync<{id:number; balanceMinor:number}>("SELECT id, balance_minor AS balanceMinor FROM accounts WHERE id=?",input.accountId);
+    if (!account) throw new Error("Portefeuille introuvable.");
+    if (account.balanceMinor < input.amountMinor) throw new Error("Solde insuffisant. Mets à jour ton solde de départ ou choisis un autre portefeuille.");
+    if (input.vehicleId != null && !await txn.getFirstAsync("SELECT id FROM vehicles WHERE id=?",input.vehicleId)) throw new Error("Véhicule introuvable.");
+    const timestamp=localTimestamp();
+    const result=await txn.runAsync("INSERT INTO transactions (account_id,type,amount_minor,category,note,occurred_at) VALUES (?,'expense',?,'Transport',?,?)",account.id,input.amountMinor,input.note?.trim()||"Dépense de transport",timestamp);
+    await txn.runAsync("UPDATE accounts SET balance_minor=balance_minor-? WHERE id=?",input.amountMinor,account.id);
+    await txn.runAsync("INSERT INTO transport_entries (vehicle_id,transaction_id,kind,liters_milli,odometer_km,note,occurred_at) VALUES (?,?,?,?,?,?,?)",input.vehicleId??null,Number(result.lastInsertRowId),input.kind,input.liters==null?null:Math.round(input.liters*1000),input.odometerKm??null,input.note?.trim()||null,timestamp);
+  });
+}
+export async function listCalendarEvents(db: SQLiteDatabase) {
+  return db.getAllAsync<import("@/src/types/finance").CalendarEvent>("SELECT id,title,amount_minor AS amountMinor,due_date AS dueDate,category,is_done AS isDone FROM calendar_events ORDER BY is_done ASC,due_date ASC");
+}
+export async function createCalendarEvent(db: SQLiteDatabase,input:{title:string;amountMinor?:number|null;dueDate:string;category:string}) {
+  if(!input.title.trim()) throw new Error("Donne un titre à cette échéance.");
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.dueDate)||Number.isNaN(Date.parse(input.dueDate+"T12:00:00"))) throw new Error("Date invalide.");
+  if(input.amountMinor!=null&&(!Number.isSafeInteger(input.amountMinor)||input.amountMinor<=0)) throw new Error("Montant invalide.");
+  await db.runAsync("INSERT INTO calendar_events (title,amount_minor,due_date,category) VALUES (?,?,?,?)",input.title.trim(),input.amountMinor??null,input.dueDate,input.category.trim()||"Autre");
+}
+export async function toggleCalendarEvent(db: SQLiteDatabase,eventId:number,done:boolean) {
+  await db.runAsync("UPDATE calendar_events SET is_done=? WHERE id=?",done?1:0,eventId);
+}
+
 export async function createBackupData(db: SQLiteDatabase) {
-  const [profile, accounts, transactions, budgets, goals, recurringRules, debts] = await Promise.all([
+  const [profile, accounts, transactions, budgets, goals, recurringRules, debts, vehicles, transportEntries, calendarEvents] = await Promise.all([
     db.getAllAsync("SELECT * FROM profile"),
     db.getAllAsync("SELECT * FROM accounts ORDER BY id"),
     db.getAllAsync("SELECT * FROM transactions ORDER BY id"),
     db.getAllAsync("SELECT * FROM budgets ORDER BY id"),
     db.getAllAsync("SELECT * FROM goals ORDER BY id"),
     db.getAllAsync("SELECT * FROM recurring_rules ORDER BY id"),
-    db.getAllAsync("SELECT * FROM debts ORDER BY id")
+    db.getAllAsync("SELECT * FROM debts ORDER BY id"),
+    db.getAllAsync("SELECT * FROM vehicles ORDER BY id"),
+    db.getAllAsync("SELECT * FROM transport_entries ORDER BY id"),
+    db.getAllAsync("SELECT * FROM calendar_events ORDER BY id")
   ]);
   return {
     app: "Mon Équilibre",
     schemaVersion: 1,
     exportedAt: new Date().toISOString(),
-    data: { profile, accounts, transactions, budgets, goals, recurringRules, debts }
+    data: { profile, accounts, transactions, budgets, goals, recurringRules, debts, vehicles, transportEntries, calendarEvents }
   };
 }
 
@@ -345,11 +388,15 @@ export async function restoreBackupData(db: SQLiteDatabase, backup: any) {
   }
   const data = backup.data;
   const required = ["profile", "accounts", "transactions", "budgets", "goals", "recurringRules", "debts"];
+  for (const key of ["vehicles", "transportEntries", "calendarEvents"]) if (data[key] === undefined) data[key] = [];
   for (const key of required) {
     if (!Array.isArray(data[key])) throw new Error("La sauvegarde est incomplète : " + key + ".");
   }
   if (data.profile.length !== 1 || data.profile[0].id !== 1) throw new Error("Le profil de la sauvegarde est invalide.");
   await db.withExclusiveTransactionAsync(async txn => {
+    await txn.runAsync("DELETE FROM transport_entries");
+    await txn.runAsync("DELETE FROM calendar_events");
+    await txn.runAsync("DELETE FROM vehicles");
     await txn.runAsync("DELETE FROM transactions");
     await txn.runAsync("DELETE FROM budgets");
     await txn.runAsync("DELETE FROM goals");
@@ -386,5 +433,8 @@ export async function restoreBackupData(db: SQLiteDatabase, backup: any) {
     for (const d of data.debts) {
       await txn.runAsync("INSERT INTO debts (id, label, person, direction, total_minor, remaining_minor, due_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", d.id, d.label, d.person, d.direction, d.total_minor, d.remaining_minor, d.due_date, d.created_at);
     }
+    for (const v of data.vehicles) await txn.runAsync("INSERT INTO vehicles (id,name,kind,fuel_type,consumption_l_per_100km,created_at) VALUES (?,?,?,?,?,?)",v.id,v.name,v.kind,v.fuel_type,v.consumption_l_per_100km,v.created_at);
+    for (const e of data.transportEntries) await txn.runAsync("INSERT INTO transport_entries (id,vehicle_id,transaction_id,kind,liters_milli,odometer_km,note,occurred_at) VALUES (?,?,?,?,?,?,?,?)",e.id,e.vehicle_id,e.transaction_id,e.kind,e.liters_milli,e.odometer_km,e.note,e.occurred_at);
+    for (const e of data.calendarEvents) await txn.runAsync("INSERT INTO calendar_events (id,title,amount_minor,due_date,category,is_done,created_at) VALUES (?,?,?,?,?,?,?)",e.id,e.title,e.amount_minor,e.due_date,e.category,e.is_done,e.created_at);
   });
 }
