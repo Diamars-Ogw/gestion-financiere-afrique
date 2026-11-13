@@ -8,44 +8,53 @@ Application mobile native de gestion financière personnelle pensée pour l'Afri
 - Fonctionnement local hors connexion après installation.
 - SQLite sur l'appareil : aucun compte en ligne ni serveur financier permanent.
 - Profil et devise adaptés au pays sélectionné.
-- Les montants sont stockés en unités monétaires mineures, selon la précision officielle de chaque devise.
+- Montants stockés en unités monétaires mineures, avec conversion décimale exacte selon la précision de chaque devise.
 - Les transferts entre portefeuilles ne sont ni des revenus ni des dépenses.
 - Les revenus attendus ne sont pas considérés comme reçus.
 - Sauvegarde et restauration manuelles des données locales.
+- Rappels locaux facultatifs, sans serveur.
 
 ## Pays et devises
 
 Le catalogue initial couvre 25 pays africains, notamment les pays de l'UEMOA (XOF), de la CEMAC (XAF), la RDC (CDF), la Guinée (GNF), le Maroc (MAD), la Tunisie (TND), l'Algérie (DZD), la Mauritanie (MRU), Djibouti (DJF), le Burundi (BIF), le Rwanda (RWF), Madagascar (MGA) et les Comores (KMF).
 
-Les deux francs CFA sont distingués : XOF pour l'Afrique de l'Ouest et XAF pour l'Afrique centrale. La devise est affichée à partir du pays choisi.
+Les deux francs CFA sont distingués : XOF pour l'Afrique de l'Ouest et XAF pour l'Afrique centrale. La devise est affichée à partir du pays choisi. Les montants sont rejetés si leur précision dépasse celle de la devise.
 
-## Fonctionnalités déjà développées
+## Fonctionnalités développées
 
-- Onboarding avec pays, devise et profil de revenus.
+- Onboarding avec pays, devise, profil de revenus et solde initial facultatif.
 - Tableau de bord alimenté par les données locales.
 - Portefeuilles : espèces, banque, Mobile Money, épargne et autres.
-- Enregistrement des revenus et dépenses.
-- Transferts atomiques entre portefeuilles de même devise.
+- Revenus, dépenses et transferts entre portefeuilles de même devise.
+- Contrôle du solde disponible avant dépense ou transfert.
 - Budgets mensuels par catégorie.
 - Objectifs d'épargne avec versements transférés vers un portefeuille Épargne.
 - Suivi des dettes et créances avec paiements comptabilisés.
 - Échéances récurrentes pour revenus et dépenses, avec confirmation manuelle avant écriture.
 - Assistant financier local à règles explicables.
 - Statistiques mensuelles et répartition des dépenses.
-- Export et restauration d'une sauvegarde JSON locale.
+- Suivi transport : véhicules, carburant, entretien, taxi-moto et transports publics.
+- Historique des prix du carburant saisis par l'utilisateur, avec date d'application.
+- Calendrier financier et rappels locaux facultatifs à 9 h.
+- Export et restauration d'une sauvegarde JSON locale, incluant les données transport et calendrier.
 - Paramètres du profil et gestion des portefeuilles.
-- Vérification TypeScript et tests unitaires des conversions monétaires via GitHub Actions.
+
+## Vérifications automatisées
+
+GitHub Actions exécute :
+- npm run typecheck : vérification TypeScript.
+- npm test : tests des conversions monétaires et des dates.
+- npm run check:bundle : export du bundle Android Expo.
+- Un rapport npm audit sur les dépendances.
 
 ## Points encore à terminer et valider
 
-- Suivi transport : véhicules, carburant, entretien, taxi-moto et transports publics.
-- Historique des prix du carburant saisis par l'utilisateur, avec date d'application.
-- Calendrier financier local pour les échéances et dépenses à anticiper.
-- Calendrier financier plus complet, rappels et notifications locales.
-- Import de données plus robuste, tests automatisés des calculs et migrations de base de données.
+- Amélioration des fonctions de modification et de gestion de l'historique.
+- Import de sauvegarde plus strict et tests des migrations SQLite.
+- Vérification de l'accessibilité, des petites tailles d'écran et des thèmes clair/sombre.
 - Tests fonctionnels sur appareils Android et iPhone.
-- Vérification de l'accessibilité, des tailles d'écran et des thèmes clair/sombre.
-- Builds EAS et préparation de la distribution Android/iOS.
+- Configuration du projet EAS, compilation APK et préparation de la distribution.
+- Préparation de la distribution iOS, soumise aux exigences de signature et au programme développeur Apple.
 
 ## Stack
 
@@ -54,11 +63,12 @@ Les deux francs CFA sont distingués : XOF pour l'Afrique de l'Ouest et XAF pour
 - TypeScript
 - Expo Router
 - expo-sqlite
+- expo-notifications
 - expo-file-system, expo-sharing et expo-document-picker
 
 ## Développement
 
-Le projet utilise GitHub Actions pour lancer `npm install` puis `npm run typecheck` à chaque push sur `main` et à chaque pull request.
+Installer les dépendances avec npm install, puis lancer npm run typecheck, npm test et npm run check:bundle.
 
 Les builds natifs seront produits avec EAS Build. La compilation cloud évite d'avoir besoin d'un Mac local pour générer un build iOS, mais la distribution iOS reste soumise aux exigences de signature et au programme développeur Apple.
 
