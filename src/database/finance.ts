@@ -163,10 +163,10 @@ export async function updateProfileSettings(
 ) {
   const current = await db.getFirstAsync<{ currency: string }>("SELECT currency FROM profile WHERE id = 1");
   if (current && current.currency !== input.currency) {
-    const activity = await db.getFirstAsync<{ transactions: number; nonZeroAccounts: number }>(
-      "SELECT (SELECT COUNT(*) FROM transactions) AS transactions, (SELECT COUNT(*) FROM accounts WHERE balance_minor != 0) AS nonZeroAccounts"
+    const activity = await db.getFirstAsync<{ transactions: number; nonZeroAccounts: number; budgets: number; goals: number; debts: number; recurring: number; calendarAmounts: number; fuelPrices: number }>(
+      "SELECT (SELECT COUNT(*) FROM transactions) AS transactions, (SELECT COUNT(*) FROM accounts WHERE balance_minor != 0) AS nonZeroAccounts, (SELECT COUNT(*) FROM budgets) AS budgets, (SELECT COUNT(*) FROM goals) AS goals, (SELECT COUNT(*) FROM debts) AS debts, (SELECT COUNT(*) FROM recurring_rules) AS recurring, (SELECT COUNT(*) FROM calendar_events WHERE amount_minor IS NOT NULL) AS calendarAmounts, (SELECT COUNT(*) FROM fuel_prices) AS fuelPrices"
     );
-    if ((activity?.transactions ?? 0) > 0 || (activity?.nonZeroAccounts ?? 0) > 0) {
+    if (activity && Object.values(activity).some(value => value > 0)) {
       throw new Error("Tu as déjà des opérations ou des soldes dans " + current.currency + ". Pour éviter de mélanger deux devises, termine d'abord une sauvegarde et une conversion sécurisée de tes soldes.");
     }
   }
