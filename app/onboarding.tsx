@@ -1,0 +1,24 @@
+import { useState } from "react";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { router } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import { saveProfile } from "@/src/database/finance";
+import type { IncomeProfile } from "@/src/types/finance";
+import { palette } from "@/src/constants/theme";
+const profiles:{value:IncomeProfile;title:string;description:string}[]=[
+ {value:"regular",title:"Revenus réguliers",description:"Salaire, pension ou revenu stable"},
+ {value:"irregular",title:"Revenus variables",description:"Commerce, missions, freelance, commissions"},
+ {value:"multiple",title:"Plusieurs sources",description:"Plusieurs activités ou revenus"},
+ {value:"none",title:"Pas de revenu personnel",description:"Études, recherche d'emploi ou soutien familial"}
+];
+const countries=[{label:"Bénin",code:"BJ",currency:"XOF"},{label:"Côte d'Ivoire",code:"CI",currency:"XOF"},{label:"Sénégal",code:"SN",currency:"XOF"},{label:"Togo",code:"TG",currency:"XOF"},{label:"Burkina Faso",code:"BF",currency:"XOF"},{label:"Mali",code:"ML",currency:"XOF"},{label:"Niger",code:"NE",currency:"XOF"},{label:"Cameroun",code:"CM",currency:"XAF"},{label:"Gabon",code:"GA",currency:"XAF"},{label:"Congo",code:"CG",currency:"XAF"},{label:"RDC",code:"CD",currency:"CDF"},{label:"Guinée",code:"GN",currency:"GNF"},{label:"Maroc",code:"MA",currency:"MAD"},{label:"Tunisie",code:"TN",currency:"TND"}];
+export default function Onboarding(){
+ const db=useSQLiteContext(); const [name,setName]=useState(""); const [countryCode,setCountryCode]=useState("BJ"); const [incomeProfile,setIncomeProfile]=useState<IncomeProfile>("regular"); const country=countries.find(c=>c.code===countryCode)??countries[0];
+ async function finish(){try{await saveProfile(db,{displayName:name,country:country.code,currency:country.currency,incomeProfile});router.replace("/(tabs)");}catch{Alert.alert("Enregistrement impossible","Réessaie dans quelques instants.");}}
+ return <ScrollView contentContainerStyle={s.container}><Text style={s.eyebrow}>MON ÉQUILIBRE · BIENVENUE</Text><Text style={s.title}>Votre argent mérite un plan.</Text><Text style={s.subtitle}>Quelques informations pour adapter votre espace financier à votre réalité.</Text>
+ <Text style={s.label}>Comment souhaitez-vous être appelé ?</Text><TextInput value={name} onChangeText={setName} placeholder="Votre prénom (facultatif)" style={s.input}/>
+ <Text style={s.label}>Votre pays</Text><View style={s.countries}>{countries.map(c=><Pressable key={c.code} onPress={()=>setCountryCode(c.code)} style={[s.country,countryCode===c.code&&s.selected]}><Text style={s.optionTitle}>{c.label}</Text><Text style={s.hint}>{c.currency}</Text></Pressable>)}</View>
+ <Text style={s.label}>Comment sont vos revenus ?</Text>{profiles.map(p=><Pressable key={p.value} onPress={()=>setIncomeProfile(p.value)} style={[s.profile,incomeProfile===p.value&&s.selected]}><View style={{flex:1}}><Text style={s.optionTitle}>{p.title}</Text><Text style={s.hint}>{p.description}</Text></View><View style={[s.radio,incomeProfile===p.value&&s.radioOn]}/></Pressable>)}
+ <Pressable onPress={finish} style={s.button}><Text style={s.buttonText}>Créer mon espace financier</Text></Pressable><Text style={s.privacy}>Vos données financières restent stockées sur cet appareil.</Text></ScrollView>;
+}
+const s=StyleSheet.create({container:{padding:24,paddingTop:62,paddingBottom:48},eyebrow:{color:palette.primary,fontWeight:"800",letterSpacing:1.4,fontSize:11},title:{color:palette.ink,fontSize:32,lineHeight:38,fontWeight:"800",marginTop:16},subtitle:{color:palette.muted,fontSize:15,lineHeight:23,marginTop:10,marginBottom:20},label:{color:palette.ink,fontSize:14,fontWeight:"700",marginBottom:10,marginTop:18},input:{backgroundColor:palette.surface,borderWidth:1,borderColor:palette.border,borderRadius:14,padding:15,fontSize:15},countries:{flexDirection:"row",flexWrap:"wrap",gap:8},country:{width:"31%",backgroundColor:palette.surface,borderColor:palette.border,borderWidth:1,borderRadius:12,padding:10},selected:{borderColor:palette.primary,backgroundColor:palette.primarySoft},profile:{flexDirection:"row",alignItems:"center",backgroundColor:palette.surface,borderColor:palette.border,borderWidth:1,borderRadius:14,padding:14,marginBottom:9},optionTitle:{color:palette.ink,fontWeight:"700",fontSize:12},hint:{color:palette.muted,fontSize:10,marginTop:4},radio:{width:18,height:18,borderRadius:9,borderWidth:2,borderColor:palette.border},radioOn:{borderColor:palette.primary,backgroundColor:palette.primary},button:{backgroundColor:palette.navy,borderRadius:15,padding:17,alignItems:"center",marginTop:28},buttonText:{color:"white",fontWeight:"800",fontSize:15},privacy:{textAlign:"center",color:palette.muted,fontSize:11,marginTop:14}});
