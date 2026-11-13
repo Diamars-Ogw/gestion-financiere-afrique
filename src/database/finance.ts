@@ -98,3 +98,18 @@ export function amountToMinorUnits(value: string, currency: string) {
   const minor = Math.round(amount * factor);
   return Number.isSafeInteger(minor) && minor > 0 ? minor : null;
 }
+
+export async function listBudgets(db: SQLiteDatabase, month: string) {
+  return db.getAllAsync<import("@/src/types/finance").Budget>(
+    "SELECT b.id, b.category, b.limit_minor AS limitMinor, b.month, COALESCE(SUM(t.amount_minor), 0) AS spentMinor FROM budgets b LEFT JOIN transactions t ON t.category = b.category AND t.type = 'expense' AND substr(t.occurred_at, 1, 7) = b.month WHERE b.month = ? GROUP BY b.id ORDER BY b.category",
+    month
+  );
+}
+
+export async function saveBudget(db: SQLiteDatabase, input: { category: string; limitMinor: number; month: string }) {
+  if (!Number.isSafeInteger(input.limitMinor) || input.limitMinor <= 0) throw new Error("Le plafond doit être supérieur à zéro.");
+  await db.runAsync(
+    "INSERT INTO budgets (category, limit_minor, month) VALUES (?, ?, ?) ON CONFLICT(category, month) DO UPDATE SET limit_minor = excluded.limit_minor",
+    input.category, input.limitMinor, input.month
+  );
+}
