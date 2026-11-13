@@ -45,6 +45,7 @@ export default function Dashboard() {
         <Pressable onPress={() => router.push({ pathname: "/(tabs)/transactions", params: { type: "expense" } })} style={s.quickItem}><Ionicons name="remove-circle-outline" size={22} color={palette.red} /><Text style={s.quickLabel}>Ajouter dépense</Text></Pressable>
         <Pressable onPress={() => router.push("/(tabs)/transactions")} style={s.quickItem}><Ionicons name="swap-horizontal-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Faire un transfert</Text></Pressable>
         <Pressable onPress={() => router.push("/(tabs)/budgets")} style={s.quickItem}><Ionicons name="pie-chart-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Mes budgets</Text></Pressable>
+        <Pressable onPress={() => router.push("/(tabs)/goals")} style={s.quickItem}><Ionicons name="flag-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Objectifs d’épargne</Text></Pressable>
       </View>
       <View style={s.sectionHeader}><Text style={s.sectionTitle}>Comptes et portefeuilles</Text><Pressable onPress={() => router.push("/(tabs)/settings")}><Text style={s.link}>Gérer</Text></Pressable></View>
       {accounts.length === 0 ? <View style={s.empty}><Ionicons name="wallet-outline" size={25} color={palette.muted} /><Text style={s.emptyTitle}>Aucun portefeuille</Text><Text style={s.emptyText}>Ajoutez votre portefeuille espèces, banque ou Mobile Money.</Text></View> : accounts.map(a => (
