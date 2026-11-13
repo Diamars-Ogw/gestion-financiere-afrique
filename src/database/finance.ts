@@ -242,3 +242,57 @@ export async function recordDebtPayment(db: SQLiteDatabase, input: { debtId: num
     await txn.runAsync("UPDATE debts SET remaining_minor = remaining_minor - ? WHERE id = ?", input.amountMinor, debt.id);
   });
 }
+
+export async function listRecurringRules(db: SQLiteDatabase) {
+  return db.getAllAsync<import("@/src/types/finance").RecurringRule>(
+    "SELECT id, label, type, amount_minor AS amountMinor, category, frequency, next_due_at AS nextDueAt, is_active AS isActive FROM recurring_rules ORDER BY is_active DESC, next_due_at ASC"
+  );
+}
+
+export async function createRecurringRule(db: SQLiteDatabase, input: { label: string; type: "income" | "expense"; amountMinor: number; category: string; frequency: import("@/src/types/finance").RecurringFrequency; nextDueAt: string }) {
+  if (!input.label.trim()) throw new Error("Donne un nom à cette échéance.");
+  if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.nextDueAt)) throw new Error("La date doit être au format AAAA-MM-JJ.");
+  await db.runAsync(
+    "INSERT INTO recurring_rules (label, type, amount_minor, category, frequency, next_due_at, is_active) VALUES (?, ?, ?, ?, ?, ?, 1)",
+    input.label.trim(), input.type, input.amountMinor, input.category, input.frequency, input.nextDueAt
+  );
+}
+
+function advanceDueDate(dateValue: string, frequency: string) {
+  const parts = dateValue.split("-").map(Number);
+  const date = new Date(parts[0], parts[1] - 1, parts[2]);
+  if (frequency === "weekly") date.setDate(date.getDate() + 7);
+  else if (frequency === "yearly") date.setFullYear(date.getFullYear() + 1);
+  else {
+    const day = date.getDate();
+    date.setDate(1);
+    date.setMonth(date.getMonth() + 1);
+    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    date.setDate(Math.min(day, lastDay));
+  }
+  return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+}
+
+export async function markRecurringRulePaid(db: SQLiteDatabase, input: { ruleId: number; accountId: number }) {
+  await db.withExclusiveTransactionAsync(async txn => {
+    const rule = await txn.getFirstAsync<{ id: number; label: string; type: string; amountMinor: number; category: string; frequency: string; nextDueAt: string; isActive: number }>(
+      "SELECT id, label, type, amount_minor AS amountMinor, category, frequency, next_due_at AS nextDueAt, is_active AS isActive FROM recurring_rules WHERE id = ?", input.ruleId
+    );
+    const account = await txn.getFirstAsync<{ id: number; balanceMinor: number }>(
+      "SELECT id, balance_minor AS balanceMinor FROM accounts WHERE id = ?", input.accountId
+    );
+    if (!rule || !rule.isActive || !account) throw new Error("Cette échéance ou ce portefeuille n'est plus disponible.");
+    if (rule.type === "expense" && account.balanceMinor < rule.amountMinor) throw new Error("Le solde du portefeuille est insuffisant.");
+    await txn.runAsync(
+      "INSERT INTO transactions (account_id, type, amount_minor, category, note, occurred_at) VALUES (?, ?, ?, ?, ?, ?)",
+      account.id, rule.type, rule.amountMinor, rule.category, rule.label, localTimestamp()
+    );
+    await txn.runAsync("UPDATE accounts SET balance_minor = balance_minor + ? WHERE id = ?", rule.type === "income" ? rule.amountMinor : -rule.amountMinor, account.id);
+    await txn.runAsync("UPDATE recurring_rules SET next_due_at = ? WHERE id = ?", advanceDueDate(rule.nextDueAt, rule.frequency), rule.id);
+  });
+}
+
+export async function toggleRecurringRule(db: SQLiteDatabase, ruleId: number, active: boolean) {
+  await db.runAsync("UPDATE recurring_rules SET is_active = ? WHERE id = ?", active ? 1 : 0, ruleId);
+}
