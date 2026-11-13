@@ -383,7 +383,7 @@ export async function createBackupData(db: SQLiteDatabase) {
     db.getAllAsync("SELECT * FROM debts ORDER BY id"),
     db.getAllAsync("SELECT * FROM vehicles ORDER BY id"),
     db.getAllAsync("SELECT * FROM transport_entries ORDER BY id"),
-    db.getAllAsync("SELECT * FROM calendar_events ORDER BY id"),
+    db.getAllAsync("SELECT id,title,amount_minor,due_date,category,is_done,created_at FROM calendar_events ORDER BY id"),
     db.getAllAsync("SELECT * FROM fuel_prices ORDER BY id")
   ]);
   return {
@@ -448,7 +448,7 @@ export async function restoreBackupData(db: SQLiteDatabase, backup: any) {
     }
     for (const v of data.vehicles) await txn.runAsync("INSERT INTO vehicles (id,name,kind,fuel_type,consumption_l_per_100km,created_at) VALUES (?,?,?,?,?,?)",v.id,v.name,v.kind,v.fuel_type,v.consumption_l_per_100km,v.created_at);
     for (const e of data.transportEntries) await txn.runAsync("INSERT INTO transport_entries (id,vehicle_id,transaction_id,kind,liters_milli,odometer_km,note,occurred_at) VALUES (?,?,?,?,?,?,?,?)",e.id,e.vehicle_id,e.transaction_id,e.kind,e.liters_milli,e.odometer_km,e.note,e.occurred_at);
-    for (const e of data.calendarEvents) await txn.runAsync("INSERT INTO calendar_events (id,title,amount_minor,due_date,category,is_done,notification_id,created_at) VALUES (?,?,?,?,?,?,?,?)",e.id,e.title,e.amount_minor,e.due_date,e.category,e.is_done,e.notification_id??null,e.created_at);
+    for (const e of data.calendarEvents) await txn.runAsync("INSERT INTO calendar_events (id,title,amount_minor,due_date,category,is_done,notification_id,created_at) VALUES (?,?,?,?,?,?,?,?)",e.id,e.title,e.amount_minor,e.due_date,e.category,e.is_done,null,e.created_at);
     for (const p of data.fuelPrices) await txn.runAsync("INSERT INTO fuel_prices (id,fuel_type,price_minor,effective_date) VALUES (?,?,?,?)",p.id,p.fuel_type,p.price_minor,p.effective_date);
   });
 }
