@@ -247,7 +247,9 @@ export async function listRecurringRules(db: SQLiteDatabase) {
 export async function createRecurringRule(db: SQLiteDatabase, input: { label: string; type: "income" | "expense"; amountMinor: number; category: string; frequency: import("@/src/types/finance").RecurringFrequency; nextDueAt: string }) {
   if (!input.label.trim()) throw new Error("Donne un nom à cette échéance.");
   if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.nextDueAt)) throw new Error("La date doit être au format AAAA-MM-JJ.");
+  if (input.type !== "income" && input.type !== "expense") throw new Error("Type d’échéance invalide.");
+  if (!["weekly", "monthly", "yearly"].includes(input.frequency)) throw new Error("Fréquence invalide.");
+  if (!isValidDateOnly(input.nextDueAt)) throw new Error("La date doit être une date réelle au format AAAA-MM-JJ.");
   await db.runAsync(
     "INSERT INTO recurring_rules (label, type, amount_minor, category, frequency, next_due_at, is_active) VALUES (?, ?, ?, ?, ?, ?, 1)",
     input.label.trim(), input.type, input.amountMinor, input.category, input.frequency, input.nextDueAt
