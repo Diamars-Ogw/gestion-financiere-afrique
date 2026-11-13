@@ -10,3 +10,6 @@ export interface SavingsGoal { id: number; name: string; targetMinor: number; cu
 
 export type DebtDirection = "i_owe" | "owed_to_me";
 export interface Debt { id: number; label: string; person: string; direction: DebtDirection; totalMinor: number; remainingMinor: number; dueDate: string | null; }
+
+export type RecurringFrequency = "weekly" | "monthly" | "yearly";
+export interface RecurringRule { id: number; label: string; type: "income" | "expense"; amountMinor: number; category: string; frequency: RecurringFrequency; nextDueAt: string; isActive: number; }
