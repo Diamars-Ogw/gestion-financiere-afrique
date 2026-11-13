@@ -50,6 +50,8 @@ export default function Dashboard() {
         <Pressable onPress={() => router.push("/(tabs)/recurring")} style={s.quickItem}><Ionicons name="calendar-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Échéances régulières</Text></Pressable>
         <Pressable onPress={() => router.push("/(tabs)/assistant")} style={s.quickItem}><Ionicons name="bulb-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Assistant financier</Text></Pressable>
         <Pressable onPress={() => router.push("/(tabs)/reports")} style={s.quickItem}><Ionicons name="stats-chart-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Statistiques</Text></Pressable>
+        <Pressable onPress={() => router.push("/(tabs)/transport")} style={s.quickItem}><Ionicons name="car-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Transport</Text></Pressable>
+        <Pressable onPress={() => router.push("/(tabs)/calendar")} style={s.quickItem}><Ionicons name="calendar-number-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Calendrier financier</Text></Pressable>
         <Pressable onPress={() => router.push("/(tabs)/backup")} style={s.quickItem}><Ionicons name="cloud-download-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Sauvegarder</Text></Pressable>
       </View>
       <View style={s.sectionHeader}><Text style={s.sectionTitle}>Comptes et portefeuilles</Text><Pressable onPress={() => router.push("/(tabs)/settings")}><Text style={s.link}>Gérer</Text></Pressable></View>
