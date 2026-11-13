@@ -113,3 +113,54 @@ export async function saveBudget(db: SQLiteDatabase, input: { category: string; 
     input.category, input.limitMinor, input.month
   );
 }
+
+export async function listGoals(db: SQLiteDatabase) {
+  return db.getAllAsync<import("@/src/types/finance").SavingsGoal>(
+    "SELECT id, name, target_minor AS targetMinor, current_minor AS currentMinor, target_date AS targetDate FROM goals ORDER BY id DESC"
+  );
+}
+
+export async function createGoal(db: SQLiteDatabase, input: { name: string; targetMinor: number; targetDate?: string }) {
+  const name = input.name.trim();
+  if (!name) throw new Error("Donne un nom à cet objectif.");
+  if (!Number.isSafeInteger(input.targetMinor) || input.targetMinor <= 0) throw new Error("Le montant cible doit être supérieur à zéro.");
+  await db.runAsync("INSERT INTO goals (name, target_minor, target_date) VALUES (?, ?, ?)", name, input.targetMinor, input.targetDate || null);
+}
+
+export async function contributeToGoal(db: SQLiteDatabase, input: { goalId: number; accountId: number; amountMinor: number }) {
+  if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
+  await db.withExclusiveTransactionAsync(async txn => {
+    const goal = await txn.getFirstAsync<{ id: number; name: string; targetMinor: number }>(
+      "SELECT id, name, target_minor AS targetMinor FROM goals WHERE id = ?", input.goalId
+    );
+    const source = await txn.getFirstAsync<{ id: number; currency: string; balanceMinor: number }>(
+      "SELECT id, currency, balance_minor AS balanceMinor FROM accounts WHERE id = ?", input.accountId
+    );
+    if (!goal || !source) throw new Error("L'objectif ou le portefeuille est introuvable.");
+    if (source.balanceMinor < input.amountMinor) throw new Error("Le solde du portefeuille est insuffisant.");
+    let savings = await txn.getFirstAsync<{ id: number; currency: string }>(
+      "SELECT id, currency FROM accounts WHERE type = 'savings' AND currency = ? ORDER BY id LIMIT 1", source.currency
+    );
+    if (!savings) {
+      const created = await txn.runAsync(
+        "INSERT INTO accounts (name, type, balance_minor, currency) VALUES (?, 'savings', 0, ?)",
+        "Épargne", source.currency
+      );
+      savings = { id: Number(created.lastInsertRowId), currency: source.currency };
+    }
+    if (savings.id === source.id) throw new Error("Choisis un portefeuille différent du compte épargne.");
+    const group = "goal-" + goal.id + "-" + Date.now().toString();
+    const date = localTimestamp();
+    await txn.runAsync(
+      "INSERT INTO transactions (account_id, type, amount_minor, category, note, occurred_at, transfer_group) VALUES (?, 'transfer', ?, ?, ?, ?, ?)",
+      source.id, input.amountMinor, "Épargne vers " + goal.name, "Versement objectif", date, group
+    );
+    await txn.runAsync(
+      "INSERT INTO transactions (account_id, type, amount_minor, category, note, occurred_at, transfer_group) VALUES (?, 'transfer', ?, ?, ?, ?, ?)",
+      savings.id, input.amountMinor, "Épargne reçue pour " + goal.name, "Versement objectif", date, group
+    );
+    await txn.runAsync("UPDATE accounts SET balance_minor = balance_minor - ? WHERE id = ?", input.amountMinor, source.id);
+    await txn.runAsync("UPDATE accounts SET balance_minor = balance_minor + ? WHERE id = ?", input.amountMinor, savings.id);
+    await txn.runAsync("UPDATE goals SET current_minor = current_minor + ? WHERE id = ?", input.amountMinor, goal.id);
+  });
+}
