@@ -68,10 +68,11 @@ export async function transferBetweenAccounts(
   if (input.fromAccountId === input.toAccountId) throw new Error("Choisis deux portefeuilles différents.");
   if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
   await db.withExclusiveTransactionAsync(async txn => {
-    const from = await txn.getFirstAsync<{ id: number; currency: string }>("SELECT id, currency FROM accounts WHERE id = ?", input.fromAccountId);
+    const from = await txn.getFirstAsync<{ id: number; currency: string; balanceMinor: number }>("SELECT id, currency, balance_minor AS balanceMinor FROM accounts WHERE id = ?", input.fromAccountId);
     const to = await txn.getFirstAsync<{ id: number; currency: string }>("SELECT id, currency FROM accounts WHERE id = ?", input.toAccountId);
     if (!from || !to) throw new Error("Un des portefeuilles est introuvable.");
     if (from.currency !== to.currency) throw new Error("Les transferts entre devises différentes ne sont pas encore disponibles.");
+    if (from.balanceMinor < input.amountMinor) throw new Error("Le solde du portefeuille source est insuffisant.");
     const group = "transfer-" + Date.now().toString() + "-" + Math.random().toString(36).slice(2, 8);
     const date = localTimestamp();
     const note = input.note?.trim() || null;
