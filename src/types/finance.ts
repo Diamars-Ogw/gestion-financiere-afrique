@@ -13,3 +13,9 @@ export interface Debt { id: number; label: string; person: string; direction: De
 
 export type RecurringFrequency = "weekly" | "monthly" | "yearly";
 export interface RecurringRule { id: number; label: string; type: "income" | "expense"; amountMinor: number; category: string; frequency: RecurringFrequency; nextDueAt: string; isActive: number; }
+
+export type VehicleKind = "motorcycle" | "car" | "other";
+export type TransportKind = "fuel" | "maintenance" | "public_transport" | "taxi" | "other";
+export interface Vehicle { id: number; name: string; kind: VehicleKind; fuelType: string; consumptionLPer100Km: number | null; }
+export interface TransportEntry { id: number; vehicleId: number | null; transactionId: number; kind: TransportKind; litersMilli: number | null; odometerKm: number | null; note: string | null; occurredAt: string; amountMinor: number; }
+export interface CalendarEvent { id: number; title: string; amountMinor: number | null; dueDate: string; category: string; isDone: number; }
