@@ -7,3 +7,6 @@ export interface Transaction { id: number; accountId: number; type: TransactionT
 export interface Budget { id: number; category: string; limitMinor: number; spentMinor: number; month: string; }
 
 export interface SavingsGoal { id: number; name: string; targetMinor: number; currentMinor: number; targetDate: string | null; }
+
+export type DebtDirection = "i_owe" | "owed_to_me";
+export interface Debt { id: number; label: string; person: string; direction: DebtDirection; totalMinor: number; remainingMinor: number; dueDate: string | null; }
