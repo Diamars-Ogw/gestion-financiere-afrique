@@ -93,7 +93,7 @@ export function amountToMinorUnits(value: string, currency: string) {
   const normalized = value.trim().replace(/\s/g, "").replace(",", ".");
   const amount = Number(normalized);
   if (!normalized || !Number.isFinite(amount) || amount <= 0) return null;
-  const digits = new Intl.NumberFormat("fr-FR", { style: "currency", currency }).resolvedOptions().maximumFractionDigits;
+  const digits = new Intl.NumberFormat("fr-FR", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2;
   const factor = 10 ** digits;
   const minor = Math.round(amount * factor);
   return Number.isSafeInteger(minor) && minor > 0 ? minor : null;
