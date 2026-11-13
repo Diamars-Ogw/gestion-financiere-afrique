@@ -1,6 +1,7 @@
 import type { SQLiteDatabase } from "expo-sqlite";
 import type { Account, Transaction, UserProfile, TransactionType } from "@/src/types/finance";
 import { amountToMinorUnits, formatMoney } from "@/src/utils/money";
+import { isValidDateOnly } from "@/src/utils/date";
 export { amountToMinorUnits, formatMoney } from "@/src/utils/money";
 
 export async function getProfile(db: SQLiteDatabase): Promise<UserProfile | null> {
@@ -347,7 +348,7 @@ export async function listFuelPrices(db: SQLiteDatabase) {
 export async function saveFuelPrice(db: SQLiteDatabase,input:{fuelType:string;priceMinor:number;effectiveDate:string}) {
   if(!input.fuelType.trim()) throw new Error("Indique le type de carburant.");
   if(!Number.isSafeInteger(input.priceMinor)||input.priceMinor<=0) throw new Error("Prix au litre invalide.");
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.effectiveDate)||Number.isNaN(Date.parse(input.effectiveDate+"T12:00:00"))) throw new Error("Date invalide.");
+  if(!isValidDateOnly(input.effectiveDate)) throw new Error("Date invalide.");
   await db.runAsync("INSERT INTO fuel_prices (fuel_type,price_minor,effective_date) VALUES (?,?,?) ON CONFLICT(fuel_type,effective_date) DO UPDATE SET price_minor=excluded.price_minor",input.fuelType.trim(),input.priceMinor,input.effectiveDate);
 }
 export async function listCalendarEvents(db: SQLiteDatabase) {
@@ -355,7 +356,7 @@ export async function listCalendarEvents(db: SQLiteDatabase) {
 }
 export async function createCalendarEvent(db: SQLiteDatabase,input:{title:string;amountMinor?:number|null;dueDate:string;category:string}) {
   if(!input.title.trim()) throw new Error("Donne un titre à cette échéance.");
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(input.dueDate)||Number.isNaN(Date.parse(input.dueDate+"T12:00:00"))) throw new Error("Date invalide.");
+  if(!isValidDateOnly(input.dueDate)) throw new Error("Date invalide.");
   if(input.amountMinor!=null&&(!Number.isSafeInteger(input.amountMinor)||input.amountMinor<=0)) throw new Error("Montant invalide.");
   const result = await db.runAsync("INSERT INTO calendar_events (title,amount_minor,due_date,category) VALUES (?,?,?,?)",input.title.trim(),input.amountMinor??null,input.dueDate,input.category.trim()||"Autre");
   return Number(result.lastInsertRowId);
