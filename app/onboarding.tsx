@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { ensureDefaultAccount, saveProfile } from "@/src/database/finance";
+import { amountToMinorUnits, ensureDefaultAccount, saveProfile } from "@/src/database/finance";
 import { COUNTRIES } from "@/src/constants/countries";
 import type { IncomeProfile } from "@/src/types/finance";
 import { palette } from "@/src/constants/theme";
@@ -19,6 +19,7 @@ export default function Onboarding() {
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("BJ");
   const [incomeProfile, setIncomeProfile] = useState<IncomeProfile>("regular");
+  const [openingBalance, setOpeningBalance] = useState("");
   const country = COUNTRIES.find(c => c.code === countryCode) ?? COUNTRIES[0];
 
   async function finish() {
@@ -29,7 +30,9 @@ export default function Onboarding() {
         currency: country.currency,
         incomeProfile
       });
-      await ensureDefaultAccount(db, country.currency);
+      const openingMinor = openingBalance.trim() ? amountToMinorUnits(openingBalance, country.currency) : 0;
+      if (openingMinor === null) throw new Error("Solde initial invalide.");
+      await ensureDefaultAccount(db, country.currency, openingMinor);
       router.replace("/(tabs)");
     } catch {
       Alert.alert("Enregistrement impossible", "Réessaie dans quelques instants.");
@@ -57,6 +60,9 @@ export default function Onboarding() {
         <Text style={s.currencyValue}>{country.currency} · {country.currencyLabel}</Text>
         <Text style={s.currencyNote}>Elle sera utilisée pour vos montants et vos budgets. Vous pourrez modifier votre pays dans les paramètres.</Text>
       </View>
+      <Text style={s.label}>Solde actuel de ton portefeuille espèces (facultatif)</Text>
+      <TextInput value={openingBalance} onChangeText={setOpeningBalance} placeholder={"Montant en " + country.currency} keyboardType="decimal-pad" style={s.input} />
+      <Text style={s.hint}>Ce montant est un solde de départ, pas un revenu du mois.</Text>
       <Text style={s.label}>Comment sont vos revenus ?</Text>
       {profiles.map(p => (
         <Pressable key={p.value} onPress={() => setIncomeProfile(p.value)} style={[s.profile, incomeProfile === p.value && s.selected]}>
