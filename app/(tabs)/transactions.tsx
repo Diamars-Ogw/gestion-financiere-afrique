@@ -188,7 +188,7 @@ const s = StyleSheet.create({
   categoryText: { color: palette.muted, fontSize: 13, fontWeight: "600" },
   categoryTextActive: { color: palette.primary },
   noteInput: { backgroundColor: palette.background, borderWidth: 1, borderColor: palette.border, borderRadius: 11, padding: 12, color: palette.ink, fontSize: 14 },
-  helper: { color: palette.muted, fontSize: 12, lineHeight: 16, marginTop: 8 },
+  helper: { color: palette.muted, fontSize: 13, lineHeight: 16, marginTop: 8 },
   submit: { backgroundColor: palette.navy, borderRadius: 12, padding: 15, alignItems: "center", marginTop: 20 },
   submitText: { color: "#FFFFFF", fontWeight: "800", fontSize: 15 },
   sectionTitle: { color: palette.ink, fontSize: 17, fontWeight: "800", marginTop: 25, marginBottom: 12 },
