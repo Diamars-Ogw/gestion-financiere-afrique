@@ -7,7 +7,7 @@ import { getProfile, listAccounts, listRecentTransactions, getMonthTotals, forma
 import type { Account, Transaction, UserProfile } from "@/src/types/finance";
 import { palette } from "@/src/constants/theme";
 
-export default function Dashboard() {
+function displayDate(value: string) {\n  const date = new Date(value.slice(0, 10) + "T12:00:00");\n  return Number.isNaN(date.getTime()) ? value.slice(0, 10) : new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short" }).format(date);\n}\n\nexport default function Dashboard() {
   const db = useSQLiteContext();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -46,14 +46,14 @@ export default function Dashboard() {
     </View>
     <View style={s.sectionHeader}><Text style={s.sectionTitle}>Raccourcis</Text></View>
     <View style={s.shortcuts}>
-      <Pressable onPress={() => router.push({pathname:"/(tabs)/transactions",params:{type:"income"}})} style={s.shortcut}><Ionicons name="add" size={23} color="#FFFFFF"/><Text style={s.shortcutText}>Revenu</Text></Pressable>
-      <Pressable onPress={() => router.push({pathname:"/(tabs)/transactions",params:{type:"expense"}})} style={[s.shortcut,s.shortcutExpense]}><Ionicons name="remove" size={23} color={palette.ink}/><Text style={[s.shortcutText,{color:palette.ink}]}>Dépense</Text></Pressable>
-      <Pressable onPress={() => router.push("/(tabs)/transactions")} style={[s.shortcut,s.shortcutNeutral]}><Ionicons name="swap-horizontal" size={22} color={palette.primary}/><Text style={[s.shortcutText,{color:palette.ink}]}>Transfert</Text></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel="Ajouter un revenu" onPress={() => router.push({pathname:"/(tabs)/transactions",params:{type:"income"}})} style={s.shortcut}><Ionicons name="add" size={23} color="#FFFFFF"/><Text style={s.shortcutText}>Revenu</Text></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel="Ajouter une dépense" onPress={() => router.push({pathname:"/(tabs)/transactions",params:{type:"expense"}})} style={[s.shortcut,s.shortcutExpense]}><Ionicons name="remove" size={23} color={palette.ink}/><Text style={[s.shortcutText,{color:palette.ink}]}>Dépense</Text></Pressable>
+      <Pressable accessibilityRole="button" accessibilityLabel="Faire un transfert entre portefeuilles" onPress={() => router.push("/(tabs)/transactions")} style={[s.shortcut,s.shortcutNeutral]}><Ionicons name="swap-horizontal" size={22} color={palette.primary}/><Text style={[s.shortcutText,{color:palette.ink}]}>Transfert</Text></Pressable>
     </View>
     <View style={s.sectionHeader}><Text style={s.sectionTitle}>Dernières opérations</Text><Pressable onPress={() => router.push("/(tabs)/transactions")}><Text style={s.link}>Tout voir</Text></Pressable></View>
     {transactions.length === 0 ? <View style={s.empty}><Ionicons name="receipt-outline" size={28} color={palette.muted}/><Text style={s.emptyTitle}>Rien pour le moment</Text><Text style={s.emptyText}>Tes opérations apparaîtront ici.</Text></View> : transactions.map(t => <View key={t.id} style={s.transactionRow}>
       <View style={s.transactionIcon}><Ionicons name={t.type==="income"?"arrow-down":t.type==="expense"?"arrow-up":"swap-horizontal"} size={18} color={t.type==="income"?palette.green:t.type==="expense"?palette.red:palette.primary}/></View>
-      <View style={{flex:1}}><Text style={s.transactionName}>{t.category}</Text><Text style={s.transactionDate}>{t.occurredAt.slice(0,10)}</Text></View>
+      <View style={{flex:1}}><Text style={s.transactionName}>{t.category}</Text><Text style={s.transactionDate}>{displayDate(t.occurredAt)}</Text></View>
       <Text style={[s.transactionAmount,t.type==="income"&&{color:palette.green},t.type==="expense"&&{color:palette.red}]}>{t.type==="expense"?"−":t.type==="income"?"+":""}{formatMoney(t.amountMinor,currency)}</Text>
     </View>)}
     <Pressable onPress={() => router.push("/(tabs)/more")} style={s.moreCard}>
