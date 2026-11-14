@@ -16,13 +16,13 @@ export default function Backup() {
     setBusy(true);
     try {
       const backup = await createBackupData(db);
-      const filename = "mon-equilibre-sauvegarde-" + new Date().toISOString().slice(0,10) + ".json";
+      const filename = "mon-budget-sauvegarde-" + new Date().toISOString().slice(0,10) + ".json";
       const file = new File(Paths.cache, filename);
       if (file.exists) file.delete();
       file.create();
       await file.write(JSON.stringify(backup, null, 2));
       if (!(await Sharing.isAvailableAsync())) throw new Error("Le partage de fichiers n'est pas disponible sur cet appareil.");
-      await Sharing.shareAsync(file.uri, { mimeType: "application/json", dialogTitle: "Sauvegarder Mon Équilibre" });
+      await Sharing.shareAsync(file.uri, { mimeType: "application/json", dialogTitle: "Sauvegarder Mon Budget" });
     } catch (error) {
       Alert.alert("Sauvegarde impossible", error instanceof Error ? error.message : "Une erreur est survenue.");
     } finally { setBusy(false); }
@@ -42,9 +42,9 @@ export default function Backup() {
           { text: "Restaurer", style: "destructive", onPress: async () => {
             setBusy(true);
             try {
+              await restoreBackupData(db, backup);
               const scheduled = await Notifications.getAllScheduledNotificationsAsync();
               for (const notification of scheduled) await Notifications.cancelScheduledNotificationAsync(notification.identifier);
-              await restoreBackupData(db, backup);
               Alert.alert("Restauration terminée", "Les données ont été restaurées. Les rappels locaux devront être reprogrammés.");
             } catch (error) {
               Alert.alert("Restauration impossible", error instanceof Error ? error.message : "Une erreur est survenue.");
@@ -68,12 +68,12 @@ export default function Backup() {
       </View>
       <View style={s.card}>
         <Text style={s.cardTitle}>Restaurer une sauvegarde</Text>
-        <Text style={s.body}>Sélectionne un fichier JSON Mon Équilibre précédemment exporté. La restauration remplace les données locales actuelles après confirmation.</Text>
+        <Text style={s.body}>Sélectionne une sauvegarde Mon Budget ou Mon Équilibre précédemment exportée. La restauration remplace les données locales actuelles après confirmation.</Text>
         <Pressable disabled={busy} onPress={chooseRestore} style={s.secondary}><Text style={s.secondaryText}>Choisir un fichier de sauvegarde</Text></Pressable>
       </View>
       <View style={s.notice}>
         <Text style={s.noticeTitle}>À retenir</Text>
-        <Text style={s.body}>La sauvegarde n'est pas envoyée automatiquement à nos serveurs. Conserve le fichier dans un endroit sûr. Toute personne qui possède ce fichier peut potentiellement lire tes informations financières.</Text>
+        <Text style={s.body}>La sauvegarde n'est pas envoyée automatiquement à un serveur. Conserve le fichier dans un endroit sûr. Toute personne qui possède ce fichier peut potentiellement lire tes informations financières.</Text>
       </View>
     </ScrollView>
   );
