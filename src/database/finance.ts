@@ -15,11 +15,12 @@ export async function saveProfile(db: SQLiteDatabase, p: Pick<UserProfile, "disp
   );
 }
 
-export async function ensureDefaultAccount(db: SQLiteDatabase, currency: string, openingBalanceMinor = 0) {
+export async function ensureDefaultAccount(db: SQLiteDatabase, currency: string, openingBalanceMinor = 0, accountType: import("@/src/types/finance").AccountType = "cash", accountName?: string) {
   const existing = await db.getFirstAsync<{ id: number }>("SELECT id FROM accounts LIMIT 1");
   if (!existing) {
     if (!Number.isSafeInteger(openingBalanceMinor) || openingBalanceMinor < 0) throw new Error("Solde initial invalide.");
-    await db.runAsync("INSERT INTO accounts (name, type, balance_minor, currency) VALUES (?, ?, ?, ?)", "Espèces", "cash", openingBalanceMinor, currency);
+    const defaultName = accountName?.trim() || (accountType === "mobile_money" ? "Mobile Money" : accountType === "bank" ? "Banque" : "Espèces");
+    await db.runAsync("INSERT INTO accounts (name, type, balance_minor, currency) VALUES (?, ?, ?, ?)", defaultName, accountType, openingBalanceMinor, currency);
   }
 }
 
@@ -52,7 +53,6 @@ export async function createTransaction(
   await db.withExclusiveTransactionAsync(async txn => {
     const account = await txn.getFirstAsync<{ id: number; balanceMinor: number }>("SELECT id, balance_minor AS balanceMinor FROM accounts WHERE id = ?", input.accountId);
     if (!account) throw new Error("Ce portefeuille n'existe plus.");
-    if (input.type === "expense" && account.balanceMinor < input.amountMinor) throw new Error("Solde insuffisant. Mets à jour ton solde de départ ou choisis un autre portefeuille.");
     await txn.runAsync(
       "INSERT INTO transactions (account_id, type, amount_minor, category, note, occurred_at) VALUES (?, ?, ?, ?, ?, ?)",
       input.accountId, input.type, input.amountMinor, input.category, input.note?.trim() || null, localTimestamp()
