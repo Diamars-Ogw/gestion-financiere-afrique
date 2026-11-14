@@ -14,7 +14,7 @@ export function formatMoney(amountMinor: number, currency: string) {
 }
 
 export function amountToMinorUnits(value: string, currency: string) {
-  const normalized = value.trim().replace(/\\s/g, "").replace(",", ".");
+  const normalized = value.trim().replace(/[ \u00A0]/g, "").replace(",", ".");
   if (!normalized) return null;
   const parts = normalized.split(".");
   if (parts.length > 2 || !parts[0] || !/^[0-9]+$/.test(parts[0])) return null;
