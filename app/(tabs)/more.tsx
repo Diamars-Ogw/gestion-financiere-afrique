@@ -36,7 +36,7 @@ export default function More() {
  </ScrollView>;
 }
 const s=StyleSheet.create({
- page:{flex:1,backgroundColor:palette.background},content:{padding:22,paddingTop:58,paddingBottom:40},kicker:{color:palette.primary,fontSize:11,fontWeight:"900",letterSpacing:1.5},title:{color:palette.ink,fontSize:28,fontWeight:"900",marginTop:7},subtitle:{color:palette.muted,fontSize:15,lineHeight:23,marginTop:9,marginBottom:10},
- groupTitle:{color:palette.ink,fontSize:17,fontWeight:"900",marginTop:23,marginBottom:11},panel:{backgroundColor:palette.surface,borderRadius:20,paddingHorizontal:15,borderWidth:1,borderColor:palette.border},
- item:{flexDirection:"row",alignItems:"center",paddingVertical:16,gap:13},separator:{borderTopWidth:1,borderTopColor:palette.border},icon:{width:44,height:44,borderRadius:15,backgroundColor:palette.primarySoft,alignItems:"center",justifyContent:"center"},itemTitle:{color:palette.ink,fontSize:15,fontWeight:"800"},hint:{color:palette.muted,fontSize:12,lineHeight:17,marginTop:4}
+ page:{flex:1,backgroundColor:palette.background},content:{padding:22,paddingTop:58,paddingBottom:40},kicker:{color:palette.primary,fontSize: 13,fontWeight: "800",letterSpacing:1.5},title:{color:palette.ink,fontSize:28,fontWeight: "800",marginTop:7},subtitle:{color:palette.muted,fontSize:15,lineHeight:23,marginTop:9,marginBottom:10},
+ groupTitle:{color:palette.ink,fontSize:17,fontWeight: "800",marginTop:23,marginBottom:11},panel:{backgroundColor:palette.surface,borderRadius:20,paddingHorizontal:15,borderWidth:1,borderColor:palette.border},
+ item:{flexDirection:"row",alignItems:"center",paddingVertical:16,gap:13},separator:{borderTopWidth:1,borderTopColor:palette.border},icon:{width:44,height:44,borderRadius:15,backgroundColor:palette.primarySoft,alignItems:"center",justifyContent:"center"},itemTitle:{color:palette.ink,fontSize:15,fontWeight:"800"},hint:{color:palette.muted,fontSize: 13,lineHeight:17,marginTop:4}
 });
