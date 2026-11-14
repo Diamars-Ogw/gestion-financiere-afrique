@@ -20,6 +20,8 @@ jobs:
         with:
           packages: platform-tools platforms;android-36 build-tools;36.0.0 ndk;27.1.12297006 cmake;3.22.1
       - run: npm install
+      - name: Generate app icons
+        run: npm run icons:generate
       - name: Generate native Android project
         run: npx expo prebuild --platform android --no-install --clean
         env:
@@ -28,7 +30,7 @@ jobs:
         run: cd android && ./gradlew assembleRelease --no-daemon --stacktrace --console=plain
       - uses: actions/upload-artifact@v4
         with:
-          name: mon-equilibre-android-standalone
+          name: mon-budget-android-standalone
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
