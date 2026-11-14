@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
 <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0BA875"/><stop offset="1" stop-color="#034B38"/></linearGradient><linearGradient id="wallet" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#DDF7EA"/></linearGradient><linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#B9F36A"/><stop offset="1" stop-color="#12C981"/></linearGradient></defs>
-<rect width="1024" height="1024" rx="230" fill="url(#bg)"/>
+<rect width="1024" height="1024" fill="url(#bg)"/>
 <circle cx="180" cy="150" r="310" fill="#35D69A" opacity=".13"/><circle cx="900" cy="890" r="360" fill="#002F24" opacity=".22"/>
 <path d="M190 385 Q190 310 275 310 H760 Q825 310 825 385 V735 Q825 810 750 810 H250 Q175 810 175 735 V420 Q175 385 190 385Z" fill="url(#wallet)"/>
 <path d="M220 395 L700 395 Q775 395 800 445 L800 520 H220Z" fill="#E9FFF2"/>
 <path d="M230 610 Q460 610 570 480 Q680 350 800 215 Q820 395 710 505 Q575 640 390 690 Q300 715 220 700Z" fill="url(#leaf)"/>
 <path d="M240 680 Q470 655 590 525" fill="none" stroke="#0B8F62" stroke-width="20" stroke-linecap="round"/>
-<rect x="660" y="570" width="220" height="150" rx="48" fill="#087F5B"/><circle cx="750" cy="645" r="26" fill="#E9FFF2"/>
+<rect x="650" y="570" width="190" height="140" rx="44" fill="#087F5B"/><circle cx="730" cy="640" r="24" fill="#E9FFF2"/>
 </svg>
