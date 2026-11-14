@@ -17,80 +17,69 @@ export default function Dashboard() {
     let active = true;
     const now = new Date();
     const month = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
-    Promise.all([getProfile(db), listAccounts(db), listRecentTransactions(db, 5), getMonthTotals(db, month)]).then(([p, a, t, m]) => {
+    Promise.all([getProfile(db), listAccounts(db), listRecentTransactions(db, 4), getMonthTotals(db, month)]).then(([p,a,t,m]) => {
       if (active) { setProfile(p); setAccounts(a); setTransactions(t); setTotals(m); }
     });
     return () => { active = false; };
   }, [db]));
-  const total = accounts.reduce((sum, a) => sum + a.balanceMinor, 0);
+  const total = accounts.reduce((sum,a) => sum + a.balanceMinor, 0);
   const currency = profile?.currency ?? "XOF";
-  return (
-    <ScrollView style={s.page} contentContainerStyle={s.content}>
-      <View style={s.header}>
-        <View><Text style={s.kicker}>VOTRE ESPACE FINANCIER</Text><Text style={s.greeting}>Bonjour{profile?.displayName ? ", " + profile.displayName : ""} 👋</Text></View>
-        <Pressable onPress={() => router.push("/(tabs)/settings")} style={s.avatar}><Ionicons name="person" size={19} color={palette.primary} /></Pressable>
-      </View>
-      <View style={s.balanceCard}>
-        <Text style={s.balanceLabel}>Solde total enregistré</Text>
-        <Text style={s.balance}>{formatMoney(total, currency)}</Text>
-        <Text style={s.balanceNote}>Sur {accounts.length} portefeuille(s) · Données locales</Text>
-        <View style={s.cardFooter}>
-          <View><Text style={s.cardSmall}>Revenus du mois</Text><Text style={s.cardValue}>{formatMoney(totals.income, currency)}</Text></View>
-          <View><Text style={s.cardSmall}>Dépenses du mois</Text><Text style={s.cardValue}>{formatMoney(totals.expenses, currency)}</Text></View>
-        </View>
-      </View>
-      <View style={s.sectionHeader}><Text style={s.sectionTitle}>Accès rapide</Text></View>
-      <View style={s.quickGrid}>
-        <Pressable onPress={() => router.push({ pathname: "/(tabs)/transactions", params: { type: "income" } })} style={s.quickItem}><Ionicons name="add-circle-outline" size={22} color={palette.green} /><Text style={s.quickLabel}>Ajouter revenu</Text></Pressable>
-        <Pressable onPress={() => router.push({ pathname: "/(tabs)/transactions", params: { type: "expense" } })} style={s.quickItem}><Ionicons name="remove-circle-outline" size={22} color={palette.red} /><Text style={s.quickLabel}>Ajouter dépense</Text></Pressable>
-        <Pressable onPress={() => router.push("/(tabs)/transactions")} style={s.quickItem}><Ionicons name="swap-horizontal-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Faire un transfert</Text></Pressable>
-        <Pressable onPress={() => router.push("/(tabs)/budgets")} style={s.quickItem}><Ionicons name="pie-chart-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Mes budgets</Text></Pressable>
-        <Pressable onPress={() => router.push("/(tabs)/goals")} style={s.quickItem}><Ionicons name="flag-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Objectifs d’épargne</Text></Pressable>
-        <Pressable onPress={() => router.push("/(tabs)/debts")} style={s.quickItem}><Ionicons name="swap-vertical-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Dettes et créances</Text></Pressable>
-        <Pressable onPress={() => router.push("/(tabs)/recurring")} style={s.quickItem}><Ionicons name="calendar-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Échéances régulières</Text></Pressable>
-        <Pressable onPress={() => router.push("/(tabs)/assistant")} style={s.quickItem}><Ionicons name="bulb-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Assistant financier</Text></Pressable>
-        <Pressable onPress={() => router.push("/(tabs)/reports")} style={s.quickItem}><Ionicons name="stats-chart-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Statistiques</Text></Pressable>
-        <Pressable onPress={() => router.push("/(tabs)/transport")} style={s.quickItem}><Ionicons name="car-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Transport</Text></Pressable>
-        <Pressable onPress={() => router.push("/(tabs)/calendar")} style={s.quickItem}><Ionicons name="calendar-number-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Calendrier financier</Text></Pressable>
-        <Pressable onPress={() => router.push("/(tabs)/backup")} style={s.quickItem}><Ionicons name="cloud-download-outline" size={22} color={palette.primary} /><Text style={s.quickLabel}>Sauvegarder</Text></Pressable>
-      </View>
-      <View style={s.sectionHeader}><Text style={s.sectionTitle}>Comptes et portefeuilles</Text><Pressable onPress={() => router.push("/(tabs)/settings")}><Text style={s.link}>Gérer</Text></Pressable></View>
-      {accounts.length === 0 ? <View style={s.empty}><Ionicons name="wallet-outline" size={25} color={palette.muted} /><Text style={s.emptyTitle}>Aucun portefeuille</Text><Text style={s.emptyText}>Ajoutez votre portefeuille espèces, banque ou Mobile Money.</Text></View> : accounts.map(a => (
-        <View key={a.id} style={s.row}><View style={s.accountIcon}><Ionicons name="wallet-outline" size={18} color={palette.primary} /></View><View style={{ flex: 1 }}><Text style={s.accountName}>{a.name}</Text><Text style={s.accountType}>{a.type}</Text></View><Text style={s.accountBalance}>{formatMoney(a.balanceMinor, a.currency)}</Text></View>
-      ))}
-      <View style={s.sectionHeader}><Text style={s.sectionTitle}>Dernières opérations</Text><Pressable onPress={() => router.push("/(tabs)/transactions")}><Text style={s.link}>Historique</Text></Pressable></View>
-      {transactions.length === 0 ? <View style={s.empty}><Text style={s.emptyTitle}>Votre historique commencera ici</Text><Text style={s.emptyText}>Chaque opération enregistrée aidera à construire votre bilan financier.</Text></View> : transactions.map(t => (
-        <View key={t.id} style={s.row}><View style={s.accountIcon}><Ionicons name={t.type === "income" ? "arrow-down" : t.type === "expense" ? "arrow-up" : "swap-horizontal"} size={18} color={t.type === "income" ? palette.green : t.type === "expense" ? palette.red : palette.primary} /></View><View style={{ flex: 1 }}><Text style={s.accountName}>{t.category}</Text><Text style={s.accountType}>{t.occurredAt.slice(0, 10)}</Text></View><Text style={[s.accountBalance, t.type === "income" && { color: palette.green }, t.type === "expense" && { color: palette.red }]}>{t.type === "expense" ? "−" : t.type === "income" ? "+" : ""}{formatMoney(t.amountMinor, currency)}</Text></View>
-      ))}
-    </ScrollView>
-  );
+  const net = totals.income - totals.expenses;
+
+  return <ScrollView style={s.page} contentContainerStyle={s.content}>
+    <View style={s.header}>
+      <View><Text style={s.kicker}>MON BUDGET</Text><Text style={s.greeting}>Bonjour{profile?.displayName ? ", " + profile.displayName : ""} 👋</Text><Text style={s.date}>{new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})}</Text></View>
+      <Pressable onPress={() => router.push("/(tabs)/settings")} style={s.avatar}><Ionicons name="person-outline" size={20} color={palette.primary}/></Pressable>
+    </View>
+    <View style={s.balanceCard}>
+      <Text style={s.balanceLabel}>Solde disponible</Text>
+      <Text style={s.balance}>{formatMoney(total,currency)}</Text>
+      <View style={s.cardDivider}/>
+      <View style={s.balanceMeta}><View><Text style={s.cardSmall}>Ce mois-ci</Text><Text style={s.netValue}>{formatMoney(net,currency)}</Text><Text style={s.netHint}>Reste après revenus et dépenses enregistrés</Text></View><View style={s.netIcon}><Ionicons name="trending-up" size={23} color="#C9F2DE"/></View></View>
+    </View>
+    <View style={s.sectionHeader}><Text style={s.sectionTitle}>Vue rapide</Text><Pressable onPress={() => router.push("/(tabs)/reports")}><Text style={s.link}>Voir l'analyse</Text></Pressable></View>
+    <View style={s.metrics}>
+      <View style={s.metricCard}><View style={s.metricTop}><Ionicons name="arrow-down-circle" color={palette.green} size={19}/><Text style={s.metricLabel}>Revenus</Text></View><Text style={s.metricValue}>{formatMoney(totals.income,currency)}</Text></View>
+      <View style={s.metricCard}><View style={s.metricTop}><Ionicons name="arrow-up-circle" color={palette.red} size={19}/><Text style={s.metricLabel}>Dépenses</Text></View><Text style={s.metricValue}>{formatMoney(totals.expenses,currency)}</Text></View>
+    </View>
+    <View style={s.sectionHeader}><Text style={s.sectionTitle}>Raccourcis</Text></View>
+    <View style={s.shortcuts}>
+      <Pressable onPress={() => router.push({pathname:"/(tabs)/transactions",params:{type:"income"}})} style={s.shortcut}><Ionicons name="add" size={23} color="#FFFFFF"/><Text style={s.shortcutText}>Revenu</Text></Pressable>
+      <Pressable onPress={() => router.push({pathname:"/(tabs)/transactions",params:{type:"expense"}})} style={[s.shortcut,s.shortcutExpense]}><Ionicons name="remove" size={23} color={palette.ink}/><Text style={[s.shortcutText,{color:palette.ink}]}>Dépense</Text></Pressable>
+      <Pressable onPress={() => router.push("/(tabs)/transactions")} style={[s.shortcut,s.shortcutNeutral]}><Ionicons name="swap-horizontal" size={22} color={palette.primary}/><Text style={[s.shortcutText,{color:palette.ink}]}>Transfert</Text></Pressable>
+    </View>
+    <View style={s.sectionHeader}><Text style={s.sectionTitle}>Dernières opérations</Text><Pressable onPress={() => router.push("/(tabs)/transactions")}><Text style={s.link}>Tout voir</Text></Pressable></View>
+    {transactions.length === 0 ? <View style={s.empty}><Ionicons name="receipt-outline" size={28} color={palette.muted}/><Text style={s.emptyTitle}>Rien pour le moment</Text><Text style={s.emptyText}>Tes opérations apparaîtront ici.</Text></View> : transactions.map(t => <View key={t.id} style={s.transactionRow}>
+      <View style={s.transactionIcon}><Ionicons name={t.type==="income"?"arrow-down":t.type==="expense"?"arrow-up":"swap-horizontal"} size={18} color={t.type==="income"?palette.green:t.type==="expense"?palette.red:palette.primary}/></View>
+      <View style={{flex:1}}><Text style={s.transactionName}>{t.category}</Text><Text style={s.transactionDate}>{t.occurredAt.slice(0,10)}</Text></View>
+      <Text style={[s.transactionAmount,t.type==="income"&&{color:palette.green},t.type==="expense"&&{color:palette.red}]}>{t.type==="expense"?"−":t.type==="income"?"+":""}{formatMoney(t.amountMinor,currency)}</Text>
+    </View>)}
+    <View style={s.sectionHeader}><Text style={s.sectionTitle}>Mon espace</Text></View>
+    <View style={s.tools}>
+      {[
+        {label:"Objectifs",icon:"flag-outline" as const,path:"/(tabs)/goals" as const},
+        {label:"Dettes",icon:"swap-vertical-outline" as const,path:"/(tabs)/debts" as const},
+        {label:"Échéances",icon:"calendar-outline" as const,path:"/(tabs)/recurring" as const},
+        {label:"Assistant",icon:"sparkles-outline" as const,path:"/(tabs)/assistant" as const},
+        {label:"Transport",icon:"car-outline" as const,path:"/(tabs)/transport" as const},
+        {label:"Calendrier",icon:"calendar-number-outline" as const,path:"/(tabs)/calendar" as const},
+        {label:"Sauvegarde",icon:"shield-checkmark-outline" as const,path:"/(tabs)/backup" as const}
+      ].map(item => <Pressable key={item.label} onPress={() => router.push(item.path)} style={s.tool}><Ionicons name={item.icon} size={19} color={palette.primary}/><Text style={s.toolText}>{item.label}</Text></Pressable>)}
+    </View>
+  </ScrollView>;
 }
-const s = StyleSheet.create({
-  page: { flex: 1, backgroundColor: palette.background },
-  content: { padding: 20, paddingTop: 58, paddingBottom: 30 },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 22 },
-  kicker: { color: palette.muted, fontSize: 9, fontWeight: "800", letterSpacing: 1.2 },
-  greeting: { color: palette.ink, fontSize: 24, fontWeight: "800", marginTop: 6 },
-  avatar: { width: 42, height: 42, borderRadius: 15, backgroundColor: palette.primarySoft, alignItems: "center", justifyContent: "center" },
-  balanceCard: { backgroundColor: palette.navy, borderRadius: 22, padding: 21 },
-  balanceLabel: { color: "#B7C1D2", fontSize: 12 },
-  balance: { color: "white", fontSize: 29, fontWeight: "800", marginTop: 9 },
-  balanceNote: { color: "#B7C1D2", fontSize: 10, marginTop: 7 },
-  cardFooter: { flexDirection: "row", borderTopColor: "#344156", borderTopWidth: 1, marginTop: 20, paddingTop: 15, justifyContent: "space-between" },
-  cardSmall: { color: "#B7C1D2", fontSize: 10 },
-  cardValue: { color: "white", fontSize: 13, fontWeight: "700", marginTop: 5 },
-  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 25, marginBottom: 12 },
-  sectionTitle: { color: palette.ink, fontSize: 16, fontWeight: "800" },
-  link: { color: palette.primary, fontSize: 11, fontWeight: "700" },
-  quickGrid: { flexDirection: "row", flexWrap: "wrap", gap: 9 },
-  quickItem: { width: "48%", backgroundColor: palette.surface, borderRadius: 15, padding: 14, minHeight: 82, justifyContent: "center", gap: 8 },
-  quickLabel: { color: palette.ink, fontSize: 11, fontWeight: "700" },
-  empty: { backgroundColor: palette.surface, borderRadius: 16, padding: 20, alignItems: "center" },
-  emptyTitle: { color: palette.ink, fontSize: 13, fontWeight: "700", marginTop: 8 },
-  emptyText: { color: palette.muted, fontSize: 11, lineHeight: 17, textAlign: "center", marginTop: 5 },
-  row: { flexDirection: "row", alignItems: "center", backgroundColor: palette.surface, padding: 13, borderRadius: 14, marginBottom: 8 },
-  accountIcon: { width: 36, height: 36, borderRadius: 12, backgroundColor: palette.primarySoft, alignItems: "center", justifyContent: "center", marginRight: 11 },
-  accountName: { color: palette.ink, fontWeight: "700", fontSize: 12 },
-  accountType: { color: palette.muted, fontSize: 10, marginTop: 3 },
-  accountBalance: { color: palette.ink, fontSize: 12, fontWeight: "800" }
+
+const s=StyleSheet.create({
+ page:{flex:1,backgroundColor:palette.background},content:{padding:20,paddingTop:58,paddingBottom:35},
+ header:{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginBottom:22},kicker:{color:palette.primary,fontSize:10,fontWeight:"900",letterSpacing:1.7},greeting:{color:palette.ink,fontSize:23,fontWeight:"900",marginTop:6},date:{color:palette.muted,fontSize:11,marginTop:4},
+ avatar:{width:44,height:44,borderRadius:16,backgroundColor:palette.primarySoft,alignItems:"center",justifyContent:"center"},
+ balanceCard:{backgroundColor:palette.navy,borderRadius:27,padding:22,shadowColor:"#123D31",shadowOpacity:0.12,shadowRadius:18,shadowOffset:{width:0,height:9},elevation:4},
+ balanceLabel:{color:"#C0D8CF",fontSize:12},balance:{color:"#FFFFFF",fontSize:30,fontWeight:"900",marginTop:9,letterSpacing:-0.5},cardDivider:{height:1,backgroundColor:"#356257",marginTop:19,marginBottom:15},
+ balanceMeta:{flexDirection:"row",alignItems:"center",justifyContent:"space-between"},cardSmall:{color:"#C0D8CF",fontSize:10},netValue:{color:"#FFFFFF",fontSize:17,fontWeight:"800",marginTop:5},netHint:{color:"#A8C7BA",fontSize:9,marginTop:4},netIcon:{width:42,height:42,borderRadius:15,backgroundColor:"#28634F",alignItems:"center",justifyContent:"center"},
+ sectionHeader:{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginTop:25,marginBottom:12},sectionTitle:{color:palette.ink,fontSize:16,fontWeight:"800"},link:{color:palette.primary,fontSize:11,fontWeight:"800"},
+ metrics:{flexDirection:"row",gap:11},metricCard:{flex:1,backgroundColor:palette.surface,borderRadius:18,padding:15,borderWidth:1,borderColor:palette.border},metricTop:{flexDirection:"row",alignItems:"center",gap:7},metricLabel:{color:palette.muted,fontSize:11,fontWeight:"700"},metricValue:{color:palette.ink,fontSize:15,fontWeight:"900",marginTop:12},
+ shortcuts:{flexDirection:"row",gap:10},shortcut:{flex:1,backgroundColor:palette.primary,borderRadius:16,padding:14,alignItems:"center",gap:6},shortcutExpense:{backgroundColor:"#FCEDEB"},shortcutNeutral:{backgroundColor:palette.primarySoft},shortcutText:{color:"#FFFFFF",fontSize:11,fontWeight:"800"},
+ empty:{backgroundColor:palette.surface,borderRadius:18,padding:22,alignItems:"center",borderWidth:1,borderColor:palette.border},emptyTitle:{color:palette.ink,fontSize:13,fontWeight:"800",marginTop:9},emptyText:{color:palette.muted,fontSize:11,marginTop:5},
+ transactionRow:{flexDirection:"row",alignItems:"center",backgroundColor:palette.surface,padding:13,borderRadius:15,marginBottom:8,borderWidth:1,borderColor:palette.border},transactionIcon:{width:37,height:37,borderRadius:13,backgroundColor:palette.background,alignItems:"center",justifyContent:"center",marginRight:11},transactionName:{color:palette.ink,fontSize:12,fontWeight:"800"},transactionDate:{color:palette.muted,fontSize:10,marginTop:4},transactionAmount:{color:palette.ink,fontSize:12,fontWeight:"900"},
+ tools:{flexDirection:"row",flexWrap:"wrap",gap:9},tool:{width:"31%",backgroundColor:palette.surface,borderRadius:15,padding:13,alignItems:"center",gap:7,borderWidth:1,borderColor:palette.border},toolText:{color:palette.ink,fontSize:10,fontWeight:"700"}
 });
