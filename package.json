@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check:bundle": "expo export --platform android --output-dir dist"
+    "check:bundle": "expo export --platform android --output-dir dist",
+    "icons:generate": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -35,7 +36,8 @@
   "devDependencies": {
     "@types/react": "~19.1.10",
     "typescript": "~5.9.2",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.0",
+    "sharp": "^0.34.5"
   },
   "overrides": {
     "decode-uri-component": "0.5.1",
