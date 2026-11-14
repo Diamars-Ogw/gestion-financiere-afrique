@@ -6,7 +6,6 @@ import { palette } from "@/src/constants/theme";
 const groups = [
   { title: "Préparer l'avenir", items: [
     { label: "Objectifs d'épargne", hint: "Suivre ce que tu veux mettre de côté", icon: "flag-outline" as const, route: "/(tabs)/goals" as const },
-    { label: "Budgets", hint: "Fixer des limites par catégorie", icon: "pie-chart-outline" as const, route: "/(tabs)/budgets" as const },
     { label: "Échéances récurrentes", hint: "Factures et revenus attendus", icon: "repeat-outline" as const, route: "/(tabs)/recurring" as const }
   ]},
   { title: "Garder le contrôle", items: [
