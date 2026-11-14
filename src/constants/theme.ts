@@ -11,6 +11,8 @@ export const palette = {
   muted: "#5D7068",
   background: "#F4F8F5",
   surface: "#FFFFFF",
+  surfaceMuted: "#C0D8CF",
+  surfaceSoft: "#E4F0EB",
   border: "#DCE7E0",
   orange: "#9A5A08",
   orangeSoft: "#FFF4E3",
