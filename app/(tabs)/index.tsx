@@ -54,18 +54,11 @@ export default function Dashboard() {
       <View style={{flex:1}}><Text style={s.transactionName}>{t.category}</Text><Text style={s.transactionDate}>{t.occurredAt.slice(0,10)}</Text></View>
       <Text style={[s.transactionAmount,t.type==="income"&&{color:palette.green},t.type==="expense"&&{color:palette.red}]}>{t.type==="expense"?"−":t.type==="income"?"+":""}{formatMoney(t.amountMinor,currency)}</Text>
     </View>)}
-    <View style={s.sectionHeader}><Text style={s.sectionTitle}>Mon espace</Text></View>
-    <View style={s.tools}>
-      {[
-        {label:"Objectifs",icon:"flag-outline" as const,path:"/(tabs)/goals" as const},
-        {label:"Dettes",icon:"swap-vertical-outline" as const,path:"/(tabs)/debts" as const},
-        {label:"Échéances",icon:"calendar-outline" as const,path:"/(tabs)/recurring" as const},
-        {label:"Assistant",icon:"sparkles-outline" as const,path:"/(tabs)/assistant" as const},
-        {label:"Transport",icon:"car-outline" as const,path:"/(tabs)/transport" as const},
-        {label:"Calendrier",icon:"calendar-number-outline" as const,path:"/(tabs)/calendar" as const},
-        {label:"Sauvegarde",icon:"shield-checkmark-outline" as const,path:"/(tabs)/backup" as const}
-      ].map(item => <Pressable key={item.label} onPress={() => router.push(item.path)} style={s.tool}><Ionicons name={item.icon} size={19} color={palette.primary}/><Text style={s.toolText}>{item.label}</Text></Pressable>)}
-    </View>
+    <Pressable onPress={() => router.push("/(tabs)/more")} style={s.moreCard}>
+      <View style={s.moreIcon}><Ionicons name="grid-outline" size={22} color={palette.primary}/></View>
+      <View style={{flex:1}}><Text style={s.moreTitle}>Tous les outils</Text><Text style={s.moreHint}>Objectifs, dettes, transport, rappels et paramètres</Text></View>
+      <Ionicons name="chevron-forward" size={19} color={palette.muted}/>
+    </Pressable>
   </ScrollView>;
 }
 
@@ -81,5 +74,5 @@ const s=StyleSheet.create({
  shortcuts:{flexDirection:"row",gap:10},shortcut:{flex:1,backgroundColor:palette.primary,borderRadius:16,padding:14,alignItems:"center",gap:6},shortcutExpense:{backgroundColor:"#FCEDEB"},shortcutNeutral:{backgroundColor:palette.primarySoft},shortcutText:{color:"#FFFFFF",fontSize: 13,fontWeight:"800"},
  empty:{backgroundColor:palette.surface,borderRadius:18,padding:22,alignItems:"center",borderWidth:1,borderColor:palette.border},emptyTitle:{color:palette.ink,fontSize: 15,fontWeight:"800",marginTop:9},emptyText:{color:palette.muted,fontSize: 13,marginTop:5},
  transactionRow:{flexDirection:"row",alignItems:"center",backgroundColor:palette.surface,padding:13,borderRadius:15,marginBottom:8,borderWidth:1,borderColor:palette.border},transactionIcon:{width:37,height:37,borderRadius:13,backgroundColor:palette.background,alignItems:"center",justifyContent:"center",marginRight:11},transactionName:{color:palette.ink,fontSize: 14,fontWeight:"800"},transactionDate:{color:palette.muted,fontSize: 12,marginTop:4},transactionAmount:{color:palette.ink,fontSize: 14,fontWeight:"900"},
- tools:{flexDirection:"row",flexWrap:"wrap",gap:9},tool:{width:"31%",backgroundColor:palette.surface,borderRadius:15,padding:13,alignItems:"center",gap:7,borderWidth:1,borderColor:palette.border},toolText:{color:palette.ink,fontSize: 12,fontWeight:"700"}
+ moreCard:{flexDirection:"row",alignItems:"center",gap:13,backgroundColor:palette.surface,borderRadius:18,padding:15,marginTop:25,borderWidth:1,borderColor:palette.border},moreIcon:{width:44,height:44,borderRadius:14,backgroundColor:palette.primarySoft,alignItems:"center",justifyContent:"center"},moreTitle:{color:palette.ink,fontSize:15,fontWeight:"900"},moreHint:{color:palette.muted,fontSize:12,lineHeight:17,marginTop:4}
 });
