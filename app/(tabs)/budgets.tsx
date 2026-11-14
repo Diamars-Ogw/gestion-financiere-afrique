@@ -102,14 +102,14 @@ const s = StyleSheet.create({
   summary: { backgroundColor: palette.navy, borderRadius: 18, padding: 18, marginTop: 20 },
   summaryLabel: { color: "#B7C1D2", fontSize: 13 },
   summaryValue: { color: "#FFFFFF", fontSize: 25, fontWeight: "800", marginTop: 8 },
-  summaryHint: { color: "#B7C1D2", fontSize: 12, marginTop: 5 },
+  summaryHint: { color: "#B7C1D2", fontSize: 13, marginTop: 5 },
   form: { backgroundColor: palette.surface, borderRadius: 17, padding: 15, marginTop: 16 },
   formTitle: { color: palette.ink, fontSize: 15, fontWeight: "800" },
   label: { color: palette.ink, fontSize: 13, fontWeight: "800", marginTop: 15, marginBottom: 8 },
   categories: { flexDirection: "row", flexWrap: "wrap", gap: 7 },
   category: { padding: 9, borderRadius: 9, backgroundColor: palette.background, borderWidth: 1, borderColor: palette.border },
   categoryActive: { backgroundColor: palette.primarySoft, borderColor: palette.primary },
-  categoryText: { color: palette.muted, fontSize: 12, fontWeight: "700" },
+  categoryText: { color: palette.muted, fontSize: 13, fontWeight: "700" },
   categoryTextActive: { color: palette.primary },
   input: { backgroundColor: palette.background, borderWidth: 1, borderColor: palette.border, borderRadius: 11, padding: 13, color: palette.ink },
   button: { backgroundColor: palette.navy, borderRadius: 12, padding: 14, alignItems: "center", marginTop: 15 },
@@ -125,8 +125,8 @@ const s = StyleSheet.create({
   track: { height: 8, borderRadius: 5, backgroundColor: palette.border, overflow: "hidden", marginTop: 12 },
   fill: { height: 8, borderRadius: 5, backgroundColor: palette.primary },
   budgetFooter: { flexDirection: "row", justifyContent: "space-between", marginTop: 9 },
-  spent: { color: palette.ink, fontSize: 12, fontWeight: "700" },
+  spent: { color: palette.ink, fontSize: 13, fontWeight: "700" },
   limitText: { color: palette.muted, fontSize: 12 },
-  remaining: { color: palette.green, fontSize: 12, marginTop: 8, fontWeight: "700" },
-  warning: { color: palette.red, fontSize: 12, marginTop: 8, fontWeight: "800" }
+  remaining: { color: palette.green, fontSize: 13, marginTop: 8, fontWeight: "700" },
+  warning: { color: palette.red, fontSize: 13, marginTop: 8, fontWeight: "800" }
 });
