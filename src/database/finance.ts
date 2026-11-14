@@ -405,6 +405,24 @@ export async function restoreBackupData(db: SQLiteDatabase, backup: any) {
     if (!Array.isArray(data[key])) throw new Error("La sauvegarde est incomplète : " + key + ".");
   }
   if (data.profile.length !== 1 || data.profile[0].id !== 1) throw new Error("Le profil de la sauvegarde est invalide.");
+  const integer = (value: unknown) => Number.isSafeInteger(value);
+  const textValue = (value: unknown) => typeof value === "string";
+  const ids = (items: any[]) => items.every(item => integer(item.id) && item.id > 0);
+  const p = data.profile[0];
+  if (!textValue(p.display_name) || !textValue(p.country) || !textValue(p.currency) || !textValue(p.income_profile) || !integer(p.onboarding_completed)) throw new Error("Les informations du profil sont incomplètes.");
+  if (!ids(data.accounts) || !data.accounts.every((a: any) => textValue(a.name) && ["cash","bank","mobile_money","savings","other"].includes(a.type) && integer(a.balance_minor) && textValue(a.currency))) throw new Error("Un portefeuille contient des informations invalides.");
+  const accountIds = new Set(data.accounts.map((a: any) => a.id));
+  if (!ids(data.transactions) || !data.transactions.every((t: any) => accountIds.has(t.account_id) && ["income","expense","transfer"].includes(t.type) && integer(t.amount_minor) && t.amount_minor > 0 && textValue(t.category) && textValue(t.occurred_at))) throw new Error("Une opération contient des informations invalides.");
+  if (!ids(data.budgets) || !data.budgets.every((b: any) => textValue(b.category) && integer(b.limit_minor) && b.limit_minor >= 0 && textValue(b.month))) throw new Error("Un budget contient des informations invalides.");
+  if (!ids(data.goals) || !data.goals.every((g: any) => textValue(g.name) && integer(g.target_minor) && g.target_minor > 0 && integer(g.current_minor) && g.current_minor >= 0)) throw new Error("Un objectif contient des informations invalides.");
+  if (!ids(data.recurringRules) || !data.recurringRules.every((r: any) => textValue(r.label) && ["income","expense"].includes(r.type) && integer(r.amount_minor) && r.amount_minor > 0 && textValue(r.category) && ["weekly","monthly","yearly"].includes(r.frequency) && textValue(r.next_due_at))) throw new Error("Une échéance contient des informations invalides.");
+  if (!ids(data.debts) || !data.debts.every((d: any) => textValue(d.label) && ["i_owe","owed_to_me"].includes(d.direction) && integer(d.total_minor) && d.total_minor > 0 && integer(d.remaining_minor) && d.remaining_minor >= 0 && d.remaining_minor <= d.total_minor)) throw new Error("Une dette contient des informations invalides.");
+  if (!ids(data.vehicles) || !ids(data.transportEntries) || !ids(data.calendarEvents) || !ids(data.fuelPrices)) throw new Error("Une donnée complémentaire de la sauvegarde est invalide.");
+  const transactionIds = new Set(data.transactions.map((t: any) => t.id));
+  const vehicleIds = new Set(data.vehicles.map((v: any) => v.id));
+  if (!data.transportEntries.every((e: any) => transactionIds.has(e.transaction_id) && (e.vehicle_id == null || vehicleIds.has(e.vehicle_id)))) throw new Error("Une dépense de transport ne correspond pas à une opération valide.");
+  if (!data.calendarEvents.every((e: any) => textValue(e.title) && textValue(e.due_date))) throw new Error("Un événement du calendrier est invalide.");
+  if (!data.fuelPrices.every((f: any) => textValue(f.fuel_type) && integer(f.price_minor) && f.price_minor > 0 && textValue(f.effective_date))) throw new Error("Un prix de carburant est invalide.");
   await db.withExclusiveTransactionAsync(async txn => {
     await txn.runAsync("DELETE FROM transport_entries");
     await txn.runAsync("DELETE FROM calendar_events");
