@@ -1,4 +1,4 @@
-# Mon Équilibre
+# Mon Budget
 
 Application mobile native de gestion financière personnelle pensée pour l'Afrique francophone.
 
@@ -22,11 +22,11 @@ Les deux francs CFA sont distingués : XOF pour l'Afrique de l'Ouest et XAF pour
 
 ## Fonctionnalités développées
 
-- Onboarding avec pays, devise, profil de revenus et solde initial facultatif.
+- Onboarding en étapes avec pays, devise, profil de revenus, choix initial entre Mobile Money, espèces ou banque, et solde facultatif.
 - Tableau de bord alimenté par les données locales.
 - Portefeuilles : espèces, banque, Mobile Money, épargne et autres.
 - Revenus, dépenses et transferts entre portefeuilles de même devise.
-- Contrôle du solde disponible avant dépense ou transfert.
+- Avertissement si une dépense dépasse le solde suivi ; les transferts restent bloqués si le solde source est insuffisant.
 - Budgets mensuels par catégorie.
 - Objectifs d'épargne avec versements transférés vers un portefeuille Épargne.
 - Suivi des dettes et créances avec paiements comptabilisés.
@@ -36,7 +36,7 @@ Les deux francs CFA sont distingués : XOF pour l'Afrique de l'Ouest et XAF pour
 - Suivi transport : véhicules, carburant, entretien, taxi-moto et transports publics.
 - Historique des prix du carburant saisis par l'utilisateur, avec date d'application.
 - Calendrier financier et rappels locaux facultatifs à 9 h.
-- Export et restauration d'une sauvegarde JSON locale, incluant les données transport et calendrier.
+- Export et restauration d'un fichier de sauvegarde local, incluant les données transport et calendrier. Les anciennes sauvegardes Mon Équilibre restent reconnues.
 - Paramètres du profil et gestion des portefeuilles.
 
 ## Vérifications automatisées
@@ -51,7 +51,8 @@ GitHub Actions exécute :
 
 - Amélioration des fonctions de modification et de gestion de l'historique.
 - Import de sauvegarde plus strict et tests des migrations SQLite.
-- Vérification de l'accessibilité, des petites tailles d'écran et des thèmes clair/sombre.
+- Vérification complète de l'accessibilité et des petites tailles d'écran.
+- Le thème clair est actuellement activé ; le thème sombre n'est pas encore disponible.
 - Tests fonctionnels sur appareils Android et iPhone.
 - Configuration du projet EAS, compilation APK et préparation de la distribution.
 - Préparation de la distribution iOS, soumise aux exigences de signature et au programme développeur Apple.
