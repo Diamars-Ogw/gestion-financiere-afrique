@@ -13,6 +13,20 @@ const categories = {
   expense: ["Alimentation", "Logement", "Transport", "Santé", "Éducation", "Factures", "Communication", "Famille", "Loisirs", "Autre dépense"]
 };
 
+function groupAmountInput(value: string) {
+  const normalized = value.replace(/[^0-9,.\s]/g, "").replace(/\s/g, "");
+  const separatorIndex = normalized.search(/[,.]/);
+  const whole = separatorIndex < 0 ? normalized : normalized.slice(0, separatorIndex);
+  const fraction = separatorIndex < 0 ? "" : normalized.slice(separatorIndex + 1).replace(/[,.]/g, "");
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return separatorIndex < 0 ? grouped : grouped + normalized[separatorIndex] + fraction;
+}
+
+function displayDate(value: string) {
+  const date = new Date(value.slice(0, 10) + "T12:00:00");
+  return Number.isNaN(date.getTime()) ? value.slice(0, 10) : new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short" }).format(date);
+}
+
 export default function Transactions() {
   const db = useSQLiteContext();
   const params = useLocalSearchParams<{ type?: string }>();
@@ -58,16 +72,8 @@ export default function Transactions() {
     if (next !== "transfer") setCategory(categories[next][0]);
   }
 
-  async function submit() {
-    const amountMinor = amountToMinorUnits(amount, currency);
-    if (amountMinor === null) {
-      Alert.alert("Montant incorrect", "Saisis un montant supérieur à zéro.");
-      return;
-    }
-    if (accountId === null) {
-      Alert.alert("Portefeuille manquant", "Crée ou sélectionne un portefeuille.");
-      return;
-    }
+  async function saveOperation(amountMinor: number) {
+    if (accountId === null) return;
     setSaving(true);
     try {
       if (mode === "transfer") {
@@ -87,11 +93,33 @@ export default function Transactions() {
     }
   }
 
+  function submit() {
+    const amountMinor = amountToMinorUnits(amount, selectedCurrency);
+    if (amountMinor === null) {
+      Alert.alert("Montant incorrect", "Saisis un montant supérieur à zéro.");
+      return;
+    }
+    if (accountId === null) {
+      Alert.alert("Portefeuille manquant", "Crée ou sélectionne un portefeuille.");
+      return;
+    }
+    const selectedAccount = accounts.find(a => a.id === accountId);
+    if (mode === "expense" && selectedAccount && selectedAccount.balanceMinor < amountMinor) {
+      Alert.alert(
+        "Solde suivi insuffisant",
+        "Cette dépense dépasse le solde actuellement enregistré dans ce portefeuille. Tu peux quand même l'ajouter : le solde passera en négatif. Vérifie simplement que tu n'as pas oublié un revenu ou un solde de départ.",
+        [{ text: "Corriger", style: "cancel" }, { text: "Enregistrer quand même", onPress: () => void saveOperation(amountMinor) }]
+      );
+      return;
+    }
+    void saveOperation(amountMinor);
+  }
+
   const selectedCurrency = accounts.find(a => a.id === accountId)?.currency ?? currency;
   return (
     <ScrollView style={s.page} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
       <Text style={s.title}>Opérations</Text>
-      <Text style={s.subtitle}>Chaque mouvement est enregistré sur votre appareil et met à jour le portefeuille concerné.</Text>
+      <Text style={s.subtitle}>Chaque mouvement est enregistré sur ton téléphone et met à jour le portefeuille choisi.</Text>
       <View style={s.modeRow}>
         {(["income", "expense", "transfer"] as EntryMode[]).map(item => (
           <Pressable key={item} onPress={() => changeMode(item)} style={[s.modeButton, mode === item && s.modeActive]}>
@@ -101,7 +129,7 @@ export default function Transactions() {
       </View>
       <View style={s.form}>
         <Text style={s.label}>Montant ({selectedCurrency})</Text>
-        <TextInput value={amount} onChangeText={setAmount} placeholder="0" keyboardType="decimal-pad" style={s.amountInput} />
+        <TextInput value={amount} onChangeText={value => setAmount(groupAmountInput(value))} placeholder="0" keyboardType="decimal-pad" style={s.amountInput} />
         <Text style={s.label}>{mode === "transfer" ? "Depuis le portefeuille" : "Portefeuille"}</Text>
         <View style={s.chips}>
           {accounts.map(a => <Pressable key={a.id} onPress={() => setAccountId(a.id)} style={[s.chip, accountId === a.id && s.chipActive]}><Text style={[s.chipText, accountId === a.id && s.chipTextActive]}>{a.name}</Text></Pressable>)}
@@ -111,7 +139,7 @@ export default function Transactions() {
           <View style={s.chips}>
             {accounts.filter(a => a.id !== accountId).map(a => <Pressable key={a.id} onPress={() => setToAccountId(a.id)} style={[s.chip, toAccountId === a.id && s.chipActive]}><Text style={[s.chipText, toAccountId === a.id && s.chipTextActive]}>{a.name}</Text></Pressable>)}
           </View>
-          <Text style={s.helper}>Un transfert déplace l'argent entre deux portefeuilles sans modifier vos revenus ni vos dépenses.</Text>
+          <Text style={s.helper}>Un transfert déplace ton argent entre deux portefeuilles sans modifier tes revenus ni tes dépenses.</Text>
         </> : <>
           <Text style={s.label}>Catégorie</Text>
           <View style={s.categoryGrid}>
@@ -125,10 +153,10 @@ export default function Transactions() {
         </Pressable>
       </View>
       <Text style={s.sectionTitle}>Historique récent</Text>
-      {history.length === 0 ? <View style={s.empty}><Text style={s.emptyTitle}>Aucune opération enregistrée</Text><Text style={s.helper}>Vos revenus et dépenses apparaîtront ici.</Text></View> : history.map(item => (
+      {history.length === 0 ? <View style={s.empty}><Text style={s.emptyTitle}>Aucune opération enregistrée</Text><Text style={s.helper}>Tes revenus et dépenses apparaîtront ici.</Text></View> : history.map(item => (
         <View key={item.id} style={s.historyRow}>
           <View style={s.historyIcon}><Ionicons name={item.type === "income" ? "arrow-down" : item.type === "expense" ? "arrow-up" : "swap-horizontal"} size={17} color={item.type === "income" ? palette.green : item.type === "expense" ? palette.red : palette.primary} /></View>
-          <View style={{ flex: 1 }}><Text style={s.historyTitle}>{item.category}</Text><Text style={s.historyDate}>{item.occurredAt.slice(0, 10)}{item.note ? " · " + item.note : ""}</Text></View>
+          <View style={{ flex: 1 }}><Text style={s.historyTitle}>{item.category}</Text><Text style={s.historyDate}>{displayDate(item.occurredAt)}{item.note ? " · " + item.note : ""}</Text></View>
           <Text style={[s.historyAmount, item.type === "income" && { color: palette.green }, item.type === "expense" && { color: palette.red }]}>{item.type === "expense" ? "−" : item.type === "income" ? "+" : ""}{formatMoney(item.amountMinor, currency)}</Text>
         </View>
       ))}
@@ -157,7 +185,7 @@ const s = StyleSheet.create({
   categoryGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   category: { padding: 10, borderRadius: 10, backgroundColor: palette.background, borderWidth: 1, borderColor: palette.border },
   categoryActive: { backgroundColor: palette.primarySoft, borderColor: palette.primary },
-  categoryText: { color: palette.muted, fontSize: 12, fontWeight: "700" },
+  categoryText: { color: palette.muted, fontSize: 13, fontWeight: "600" },
   categoryTextActive: { color: palette.primary },
   noteInput: { backgroundColor: palette.background, borderWidth: 1, borderColor: palette.border, borderRadius: 11, padding: 12, color: palette.ink, fontSize: 14 },
   helper: { color: palette.muted, fontSize: 12, lineHeight: 16, marginTop: 8 },
@@ -169,6 +197,6 @@ const s = StyleSheet.create({
   historyRow: { flexDirection: "row", alignItems: "center", backgroundColor: palette.surface, borderRadius: 13, padding: 12, marginBottom: 8 },
   historyIcon: { width: 34, height: 34, borderRadius: 11, backgroundColor: palette.primarySoft, alignItems: "center", justifyContent: "center", marginRight: 10 },
   historyTitle: { color: palette.ink, fontWeight: "800", fontSize: 13 },
-  historyDate: { color: palette.muted, fontSize: 11, marginTop: 4 },
-  historyAmount: { color: palette.ink, fontWeight: "800", fontSize: 12 }
+  historyDate: { color: palette.muted, fontSize: 13, marginTop: 4 },
+  historyAmount: { color: palette.ink, fontWeight: "700", fontSize: 14 }
 });
