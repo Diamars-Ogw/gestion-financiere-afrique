@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { amountToMinorUnits, ensureDefaultAccount, saveProfile } from "@/src/database/finance";
 import { COUNTRIES } from "@/src/constants/countries";
-import type { IncomeProfile } from "@/src/types/finance";
+import type { AccountType, IncomeProfile } from "@/src/types/finance";
 import { palette } from "@/src/constants/theme";
 
 const profiles: { value: IncomeProfile; title: string; description: string }[] = [
@@ -14,7 +14,7 @@ const profiles: { value: IncomeProfile; title: string; description: string }[] =
   { value: "none", title: "Pas de revenu personnel", description: "Études, recherche d'emploi ou soutien familial" }
 ];
 
-const steps = ["Ton prénom", "Ton pays", "Tes revenus", "Ton solde"];
+const steps = ["Ton prénom", "Ton pays", "Tes revenus", "Ton portefeuille", "Ton solde"];
 
 export default function Onboarding() {
   const db = useSQLiteContext();
@@ -23,6 +23,8 @@ export default function Onboarding() {
   const [countryCode, setCountryCode] = useState("BJ");
   const [incomeProfile, setIncomeProfile] = useState<IncomeProfile>("regular");
   const [openingBalance, setOpeningBalance] = useState("");
+  const [accountType, setAccountType] = useState<AccountType>("mobile_money");
+  const [accountName, setAccountName] = useState("Mobile Money");
   const [countrySearch, setCountrySearch] = useState("");
   const country = COUNTRIES.find(c => c.code === countryCode) ?? COUNTRIES[0];
   const filteredCountries = useMemo(() => COUNTRIES.filter(c => c.label.toLocaleLowerCase("fr").includes(countrySearch.toLocaleLowerCase("fr"))), [countrySearch]);
@@ -32,7 +34,7 @@ export default function Onboarding() {
       const openingMinor = openingBalance.trim() ? amountToMinorUnits(openingBalance, country.currency) : 0;
       if (openingMinor === null) throw new Error("Solde initial invalide. Vérifie le montant et la précision autorisée pour cette devise.");
       await saveProfile(db, { displayName: name.trim() || "Utilisateur", country: country.code, currency: country.currency, incomeProfile });
-      await ensureDefaultAccount(db, country.currency, openingMinor);
+      await ensureDefaultAccount(db, country.currency, openingMinor, accountType, accountName);
       router.replace("/(tabs)");
     } catch (error) {
       Alert.alert("Enregistrement impossible", error instanceof Error ? error.message : "Réessaie dans quelques instants.");
@@ -86,11 +88,18 @@ export default function Onboarding() {
           </Pressable>)}
         </View>}
         {step === 3 && <View style={s.stepContent}>
+          <Text style={s.eyebrow}>TON ARGENT AU QUOTIDIEN</Text>
+          <Text style={s.title}>Où gardes-tu ton argent ?</Text>
+          <Text style={s.subtitle}>Choisis ton moyen principal. Tu pourras ajouter les autres portefeuilles ensuite.</Text>
+          {([{value:"mobile_money",label:"Mobile Money",hint:"MTN, Moov, Celtiis, Orange Money"},{value:"cash",label:"Espèces",hint:"Argent gardé sur toi ou à la maison"},{value:"bank",label:"Compte bancaire",hint:"Compte dans une banque"}] as {value:AccountType;label:string;hint:string}[]).map(option=><Pressable key={option.value} onPress={()=>{setAccountType(option.value);setAccountName(option.value==="mobile_money"?"Mobile Money":option.value==="bank"?"Banque":"Espèces");}} style={[s.profileCard,accountType===option.value&&s.profileSelected]}><View style={{flex:1}}><Text style={s.profileTitle}>{option.label}</Text><Text style={s.profileDescription}>{option.hint}</Text></View><View style={[s.radio,accountType===option.value&&s.radioOn]}>{accountType===option.value&&<View style={s.radioDot}/>}</View></Pressable>)}
+          {accountType==="mobile_money"&&<TextInput value={accountName} onChangeText={setAccountName} placeholder="Ex. MTN Mobile Money" placeholderTextColor="#9BAAA2" style={s.input}/>}
+        </View>}
+        {step === 4 && <View style={s.stepContent}>
           <Text style={s.eyebrow}>ON Y EST PRESQUE</Text>
           <Text style={s.title}>Combien as-tu actuellement ?</Text>
           <Text style={s.subtitle}>Indique ton solde de départ si tu le connais. Sinon, passe cette étape.</Text>
           <View style={s.balanceInputWrap}><TextInput value={openingBalance} onChangeText={setOpeningBalance} placeholder="0" placeholderTextColor="#9BAAA2" keyboardType="decimal-pad" style={s.balanceInput}/><Text style={s.currencyCode}>{country.currency}</Text></View>
-          <Text style={s.helper}>Ce montant initialise ton portefeuille espèces. Il ne sera pas compté comme un revenu.</Text>
+          <Text style={s.helper}>Ce montant initialise ton portefeuille {accountName.toLowerCase()}. Il ne sera pas compté comme un revenu.</Text>
           <View style={s.privacyCard}><Text style={s.privacyIcon}>🔒</Text><Text style={s.privacyText}>Tes données financières restent sur ton téléphone. Aucun compte à créer.</Text></View>
         </View>}
       </View>
@@ -105,15 +114,15 @@ export default function Onboarding() {
 const s = StyleSheet.create({
   page:{flex:1,backgroundColor:palette.background,paddingTop:58},
   top:{paddingHorizontal:25},
-  brand:{color:palette.primary,fontSize: 14,fontWeight:"900",letterSpacing:2},
-  stepText:{color:palette.muted,fontSize: 12,fontWeight:"800",letterSpacing:1,marginTop:27},
+  brand:{color:palette.primary,fontSize: 14,fontWeight:"800",letterSpacing:2},
+  stepText:{color:palette.muted,fontSize: 13,fontWeight:"700",letterSpacing:1,marginTop:27},
   progressTrack:{height:5,backgroundColor:palette.border,borderRadius:5,overflow:"hidden",marginTop:10},
   progressFill:{height:5,backgroundColor:palette.primary,borderRadius:5},
   body:{flex:1,justifyContent:"center",paddingHorizontal:25},
   stepContent:{width:"100%"},
   illustration:{width:64,height:64,borderRadius:22,backgroundColor:palette.primarySoft,alignItems:"center",justifyContent:"center",marginBottom:25},
   illustrationEmoji:{fontSize: 31},
-  eyebrow:{color:palette.primary,fontSize: 12,fontWeight:"900",letterSpacing:1.6,marginBottom:12},
+  eyebrow:{color:palette.primary,fontSize: 12,fontWeight:"700",letterSpacing:1.6,marginBottom:12},
   title:{color:palette.ink,fontSize: 29,lineHeight:36,fontWeight:"900",letterSpacing:-0.7},
   subtitle:{color:palette.muted,fontSize: 15,lineHeight:22,marginTop:11,marginBottom:25},
   input:{height:58,backgroundColor:palette.surface,borderWidth:1,borderColor:palette.border,borderRadius:17,paddingHorizontal:17,color:palette.ink,fontSize: 17},
@@ -121,11 +130,11 @@ const s = StyleSheet.create({
   countryRow:{flexDirection:"row",alignItems:"center",padding:14,backgroundColor:palette.surface,borderRadius:13,marginBottom:7,borderWidth:1,borderColor:palette.border},
   countrySelected:{borderColor:palette.primary,backgroundColor:palette.primarySoft},
   countryName:{color:palette.ink,fontSize: 15,fontWeight:"700"},
-  countryCurrency:{color:palette.muted,fontSize: 13,marginTop:3},
+  countryCurrency:{color:palette.muted,fontSize: 14,marginTop:3},
   check:{color:palette.primary,fontSize: 20,fontWeight:"900"},
   currencyNote:{backgroundColor:palette.primarySoft,padding:13,borderRadius:14,marginTop:10},
   currencyNoteTitle:{color:palette.primary,fontSize: 14,fontWeight:"800"},
-  currencyNoteText:{color:palette.muted,fontSize: 13,marginTop:4},
+  currencyNoteText:{color:palette.muted,fontSize: 14,marginTop:4},
   profileCard:{flexDirection:"row",alignItems:"center",backgroundColor:palette.surface,borderRadius:16,padding:16,borderWidth:1,borderColor:palette.border,marginBottom:10},
   profileSelected:{borderColor:palette.primary,backgroundColor:palette.primarySoft},
   profileTitle:{color:palette.ink,fontSize: 15,fontWeight:"800"},
@@ -136,10 +145,10 @@ const s = StyleSheet.create({
   balanceInputWrap:{flexDirection:"row",alignItems:"center",backgroundColor:palette.surface,borderWidth:1,borderColor:palette.border,borderRadius:18,paddingHorizontal:18},
   balanceInput:{flex:1,height:68,color:palette.ink,fontSize: 27,fontWeight:"800"},
   currencyCode:{color:palette.primary,fontSize: 15,fontWeight:"900"},
-  helper:{color:palette.muted,fontSize: 13,lineHeight:17,marginTop:10},
+  helper:{color:palette.muted,fontSize: 14,lineHeight:20,marginTop:10},
   privacyCard:{flexDirection:"row",alignItems:"center",backgroundColor:palette.surface,borderRadius:15,padding:15,marginTop:28,gap:11},
   privacyIcon:{fontSize: 19},
-  privacyText:{flex:1,color:palette.muted,fontSize: 13,lineHeight:17},
+  privacyText:{flex:1,color:palette.muted,fontSize: 14,lineHeight:20},
   footer:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",paddingHorizontal:25,paddingTop:14,paddingBottom:28},
   backButton:{paddingVertical:15,paddingHorizontal:12},
   backText:{color:palette.muted,fontSize: 15,fontWeight:"700"},
