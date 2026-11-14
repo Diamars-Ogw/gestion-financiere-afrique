@@ -127,13 +127,13 @@ const s = StyleSheet.create({
   track: { height: 8, borderRadius: 5, backgroundColor: palette.border, overflow: "hidden", marginTop: 12 },
   fill: { height: 8, borderRadius: 5, backgroundColor: palette.primary },
   amount: { color: palette.ink, fontSize: 13, fontWeight: "700", marginTop: 9 },
-  remaining: { color: palette.muted, fontSize: 12, marginTop: 5 },
-  complete: { color: palette.green, fontSize: 12, fontWeight: "800", marginTop: 5 },
+  remaining: { color: palette.muted, fontSize: 13, marginTop: 5 },
+  complete: { color: palette.green, fontSize: 13, fontWeight: "800", marginTop: 5 },
   label: { color: palette.muted, fontSize: 13, fontWeight: "700", marginTop: 10 },
   selectedName: { color: palette.ink, fontSize: 15, fontWeight: "800", marginTop: 5 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 },
   chip: { padding: 9, borderRadius: 10, borderWidth: 1, borderColor: palette.border },
   chipActive: { backgroundColor: palette.primarySoft, borderColor: palette.primary },
-  chipText: { color: palette.muted, fontSize: 12, fontWeight: "700" },
+  chipText: { color: palette.muted, fontSize: 13, fontWeight: "700" },
   chipTextActive: { color: palette.primary }
 });
