@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Mon Équilibre",
+    "name": "Mon Budget",
     "slug": "gestion-financiere-afrique",
     "scheme": "monequilibre",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
@@ -14,21 +14,14 @@
     "android": {
       "package": "com.diamars.monequilibre",
       "adaptiveIcon": {
-        "backgroundColor": "#101827"
+        "backgroundColor": "#087F5B"
       }
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-sqlite",
-        {
-          "enableFTS": true
-        }
-      ],
+      ["expo-sqlite", { "enableFTS": true }],
       "expo-notifications"
     ],
-    "experiments": {
-      "typedRoutes": true
-    }
+    "experiments": { "typedRoutes": true }
   }
 }
