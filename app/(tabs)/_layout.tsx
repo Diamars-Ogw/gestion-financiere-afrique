@@ -14,8 +14,10 @@ export default function TabLayout() {
     <Tabs.Screen name="transactions" options={{ title: "Opérations", tabBarIcon: ({color,size}) => <Ionicons name="swap-horizontal-outline" color={color} size={size}/> }} />
     <Tabs.Screen name="reports" options={{ title: "Analyse", tabBarIcon: ({color,size}) => <Ionicons name="analytics-outline" color={color} size={size}/> }} />
     <Tabs.Screen name="budgets" options={{ title: "Budgets", tabBarIcon: ({color,size}) => <Ionicons name="pie-chart-outline" color={color} size={size}/> }} />
-    <Tabs.Screen name="settings" options={{ title: "Profil", tabBarIcon: ({color,size}) => <Ionicons name="person-outline" color={color} size={size}/> }} />
+    <Tabs.Screen name="more" options={{ title: "Plus", tabBarIcon: ({color,size}) => <Ionicons name="grid-outline" color={color} size={size}/> }} />
+    <Tabs.Screen name="settings" options={{ href: null }} />
     <Tabs.Screen name="assistant" options={{ href: null }} />
+    <Tabs.Screen name="more" options={{ title: "Plus", tabBarIcon: ({color,size}) => <Ionicons name="grid-outline" color={color} size={size}/> }} />
     <Tabs.Screen name="backup" options={{ href: null }} />
     <Tabs.Screen name="calendar" options={{ href: null }} />
     <Tabs.Screen name="debts" options={{ href: null }} />
