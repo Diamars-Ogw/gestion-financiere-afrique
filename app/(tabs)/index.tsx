@@ -7,7 +7,12 @@ import { getProfile, listAccounts, listRecentTransactions, getMonthTotals, forma
 import type { Account, Transaction, UserProfile } from "@/src/types/finance";
 import { palette } from "@/src/constants/theme";
 
-function displayDate(value: string) {\n  const date = new Date(value.slice(0, 10) + "T12:00:00");\n  return Number.isNaN(date.getTime()) ? value.slice(0, 10) : new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short" }).format(date);\n}\n\nexport default function Dashboard() {
+function displayDate(value: string) {
+  const date = new Date(value.slice(0, 10) + "T12:00:00");
+  return Number.isNaN(date.getTime()) ? value.slice(0, 10) : new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short" }).format(date);
+}
+
+export default function Dashboard() {
   const db = useSQLiteContext();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
