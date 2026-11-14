@@ -3,17 +3,20 @@
     "name": "Mon Budget",
     "slug": "gestion-financiere-afrique",
     "scheme": "monequilibre",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.diamars.monequilibre"
+      "bundleIdentifier": "com.diamars.monequilibre",
+      "icon": "./assets/icon.png"
     },
     "android": {
       "package": "com.diamars.monequilibre",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-foreground.png",
         "backgroundColor": "#087F5B"
       }
     },
