@@ -387,7 +387,7 @@ export async function createBackupData(db: SQLiteDatabase) {
     db.getAllAsync("SELECT * FROM fuel_prices ORDER BY id")
   ]);
   return {
-    app: "Mon Équilibre",
+    app: "Mon Budget",
     schemaVersion: 1,
     exportedAt: new Date().toISOString(),
     data: { profile, accounts, transactions, budgets, goals, recurringRules, debts, vehicles, transportEntries, calendarEvents, fuelPrices }
@@ -395,7 +395,7 @@ export async function createBackupData(db: SQLiteDatabase) {
 }
 
 export async function restoreBackupData(db: SQLiteDatabase, backup: any) {
-  if (!backup || backup.app !== "Mon Équilibre" || backup.schemaVersion !== 1 || !backup.data) {
+  if (!backup || !["Mon Budget", "Mon Équilibre"].includes(backup.app) || backup.schemaVersion !== 1 || !backup.data) {
     throw new Error("Ce fichier n'est pas une sauvegarde Mon Équilibre reconnue.");
   }
   const data = backup.data;
@@ -425,7 +425,7 @@ export async function restoreBackupData(db: SQLiteDatabase, backup: any) {
     for (const a of data.accounts) {
       await txn.runAsync(
         "INSERT INTO accounts (id, name, type, balance_minor, currency, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-        a.id, a.name, a.type, a.balance_minor, a.currency, a.created_at
+        a.id, a.name, a.type, a.balance_minor, a.currency, a.created_at ?? new Date().toISOString()
       );
     }
     for (const t of data.transactions) {
@@ -438,17 +438,17 @@ export async function restoreBackupData(db: SQLiteDatabase, backup: any) {
       await txn.runAsync("INSERT INTO budgets (id, category, limit_minor, month) VALUES (?, ?, ?, ?)", b.id, b.category, b.limit_minor, b.month);
     }
     for (const g of data.goals) {
-      await txn.runAsync("INSERT INTO goals (id, name, target_minor, current_minor, target_date, created_at) VALUES (?, ?, ?, ?, ?, ?)", g.id, g.name, g.target_minor, g.current_minor, g.target_date, g.created_at);
+      await txn.runAsync("INSERT INTO goals (id, name, target_minor, current_minor, target_date, created_at) VALUES (?, ?, ?, ?, ?, ?)", g.id, g.name, g.target_minor, g.current_minor, g.target_date ?? null, g.created_at ?? new Date().toISOString());
     }
     for (const r of data.recurringRules) {
       await txn.runAsync("INSERT INTO recurring_rules (id, label, type, amount_minor, category, frequency, next_due_at, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", r.id, r.label, r.type, r.amount_minor, r.category, r.frequency, r.next_due_at, r.is_active);
     }
     for (const d of data.debts) {
-      await txn.runAsync("INSERT INTO debts (id, label, person, direction, total_minor, remaining_minor, due_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", d.id, d.label, d.person, d.direction, d.total_minor, d.remaining_minor, d.due_date, d.created_at);
+      await txn.runAsync("INSERT INTO debts (id, label, person, direction, total_minor, remaining_minor, due_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", d.id, d.label, d.person ?? "", d.direction, d.total_minor, d.remaining_minor, d.due_date ?? null, d.created_at ?? new Date().toISOString());
     }
     for (const v of data.vehicles) await txn.runAsync("INSERT INTO vehicles (id,name,kind,fuel_type,consumption_l_per_100km,created_at) VALUES (?,?,?,?,?,?)",v.id,v.name,v.kind,v.fuel_type,v.consumption_l_per_100km,v.created_at);
     for (const e of data.transportEntries) await txn.runAsync("INSERT INTO transport_entries (id,vehicle_id,transaction_id,kind,liters_milli,odometer_km,note,occurred_at) VALUES (?,?,?,?,?,?,?,?)",e.id,e.vehicle_id,e.transaction_id,e.kind,e.liters_milli,e.odometer_km,e.note,e.occurred_at);
-    for (const e of data.calendarEvents) await txn.runAsync("INSERT INTO calendar_events (id,title,amount_minor,due_date,category,is_done,notification_id,created_at) VALUES (?,?,?,?,?,?,?,?)",e.id,e.title,e.amount_minor,e.due_date,e.category,e.is_done,null,e.created_at);
+    for (const e of data.calendarEvents) await txn.runAsync("INSERT INTO calendar_events (id,title,amount_minor,due_date,category,is_done,notification_id,created_at) VALUES (?,?,?,?,?,?,?,?)",e.id,e.title,e.amount_minor ?? null,e.due_date,e.category ?? "Autre",e.is_done ?? 0,null,e.created_at ?? new Date().toISOString());
     for (const p of data.fuelPrices) await txn.runAsync("INSERT INTO fuel_prices (id,fuel_type,price_minor,effective_date) VALUES (?,?,?,?)",p.id,p.fuel_type,p.price_minor,p.effective_date);
   });
 }
