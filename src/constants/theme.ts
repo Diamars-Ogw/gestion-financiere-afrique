@@ -1,9 +1,21 @@
 export const palette = {
-  navy: "#101827", navySoft: "#172338", ink: "#172033", muted: "#7D8798",
-  background: "#F4F6FA", surface: "#FFFFFF", border: "#E7EAF0",
-  primary: "#5268E8", primarySoft: "#EEF0FF", green: "#15966B",
-  greenSoft: "#E7F6F0", orange: "#E79A36", orangeSoft: "#FFF3E2",
-  red: "#D95757", redSoft: "#FDECEC"
+  emerald: "#087F5B",
+  emeraldDark: "#056348",
+  primary: "#087F5B",
+  primarySoft: "#E4F4EE",
+  green: "#0B8F68",
+  greenSoft: "#E4F4EE",
+  navy: "#103B32",
+  navySoft: "#194D41",
+  ink: "#18352E",
+  muted: "#71847D",
+  background: "#F4F8F5",
+  surface: "#FFFFFF",
+  border: "#E2EBE5",
+  orange: "#D99536",
+  orangeSoft: "#FFF4E3",
+  red: "#D65B5B",
+  redSoft: "#FDEEEE"
 };
 export const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 };
-export const radius = { sm: 10, md: 16, lg: 22, pill: 999 };
+export const radius = { sm: 12, md: 18, lg: 26, pill: 999 };
