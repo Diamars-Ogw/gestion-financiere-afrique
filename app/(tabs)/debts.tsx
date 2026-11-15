@@ -104,11 +104,11 @@ export default function Debts() {
 }
 const s=StyleSheet.create({
   page:{flex:1,backgroundColor:palette.background},content:{padding:20,paddingTop:58,paddingBottom:40},
-  title:{color:palette.ink,fontSize: 26,fontWeight:"800"},subtitle:{color:palette.muted,fontSize: 14,lineHeight:19,marginTop:8},
-  form:{backgroundColor:palette.surface,borderRadius:17,padding:15,marginTop:18},formTitle:{color:palette.ink,fontSize: 15,fontWeight:"800",marginBottom:10},
-  modeRow:{flexDirection:"row",backgroundColor:palette.background,borderRadius:11,padding:4,marginTop:8},mode:{flex:1,padding:10,alignItems:"center",borderRadius:8},modeActive:{backgroundColor:palette.navy},modeText:{color:palette.muted,fontSize: 13,fontWeight:"700"},modeTextActive:{color:"#FFFFFF"},
-  input:{backgroundColor:palette.background,borderWidth:1,borderColor:palette.border,borderRadius:11,padding:12,color:palette.ink,fontSize: 14,marginTop:9},
-  button:{backgroundColor:palette.navy,borderRadius:11,padding:14,alignItems:"center",marginTop:13},buttonText:{color:"#FFFFFF",fontSize: 13,fontWeight:"800"},
+  title:{color:palette.ink,fontSize: 29,fontWeight:"800"},subtitle:{color:palette.muted,fontSize: 14,lineHeight:19,marginTop:8},
+  form:{backgroundColor:palette.surface,borderRadius:22,padding:15,marginTop:18},formTitle:{color:palette.ink,fontSize: 15,fontWeight:"800",marginBottom:10},
+  modeRow:{flexDirection:"row",backgroundColor:palette.background,borderRadius:14,padding:4,marginTop:8},mode:{flex:1,padding:10,alignItems:"center",borderRadius:8},modeActive:{backgroundColor:palette.navy},modeText:{color:palette.muted,fontSize: 13,fontWeight:"700"},modeTextActive:{color:"#FFFFFF"},
+  input:{backgroundColor:palette.background,borderWidth:1,borderColor:palette.border,borderRadius:14,padding:12,color:palette.ink,fontSize: 14,marginTop:9},
+  button:{backgroundColor:palette.navy,borderRadius:14,padding:14,alignItems:"center",marginTop:13},buttonText:{color:"#FFFFFF",fontSize: 13,fontWeight:"800"},
   sectionTitle:{color:palette.ink,fontSize: 17,fontWeight:"800",marginTop:25,marginBottom:12},empty:{backgroundColor:palette.surface,borderRadius:15,padding:18},emptyTitle:{color:palette.ink,fontSize: 15,fontWeight:"800"},emptyText:{color:palette.muted,fontSize: 13,lineHeight:17,marginTop:6},
   debtCard:{backgroundColor:palette.surface,borderWidth:1,borderColor:palette.border,borderRadius:14,padding:14,marginBottom:9},selected:{borderColor:palette.primary},debtHeader:{flexDirection:"row",justifyContent:"space-between",alignItems:"center"},debtName:{color:palette.ink,fontSize: 14,fontWeight:"800",flex:1},tag:{fontSize: 13,fontWeight:"800"},person:{color:palette.muted,fontSize: 13,marginTop:5},remaining:{color:palette.ink,fontSize: 16,fontWeight:"800",marginTop:8},total:{color:palette.muted,fontSize: 13,marginTop:4},paid:{color:palette.green,fontSize: 13,fontWeight:"800",marginTop:5},
   selectedName:{color:palette.ink,fontSize: 14,fontWeight:"800",marginTop:5},label:{color:palette.muted,fontSize: 13,fontWeight:"700",marginTop:12},chips:{flexDirection:"row",flexWrap:"wrap",gap:7,marginTop:8},chip:{padding:9,borderRadius:9,borderWidth:1,borderColor:palette.border},chipActive:{backgroundColor:palette.primarySoft,borderColor:palette.primary},chipText:{color:palette.muted,fontSize: 13,fontWeight:"700"},chipTextActive:{color:palette.primary}
