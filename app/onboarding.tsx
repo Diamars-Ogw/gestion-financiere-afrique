@@ -64,13 +64,13 @@ export default function Onboarding() {
           <Text style={s.eyebrow}>BIENVENUE</Text>
           <Text style={s.title}>Comment on t'appelle ?</Text>
           <Text style={s.subtitle}>On commence simplement. Tu pourras modifier ces informations plus tard.</Text>
-          <TextInput autoFocus value={name} onChangeText={setName} placeholder="Ton prénom" placeholderTextColor="#9BAAA2" style={s.input} returnKeyType="next" onSubmitEditing={next} />
+          <TextInput autoFocus value={name} onChangeText={setName} placeholder="Ton prénom" placeholderTextColor={palette.placeholder} style={s.input} returnKeyType="next" onSubmitEditing={next} />
         </View>}
         {step === 1 && <View style={s.stepContent}>
           <Text style={s.eyebrow}>TON ESPACE, TON PAYS</Text>
           <Text style={s.title}>Tu vis dans quel pays ?</Text>
           <Text style={s.subtitle}>On adaptera automatiquement la devise. XOF et XAF restent bien distincts.</Text>
-          <TextInput value={countrySearch} onChangeText={setCountrySearch} placeholder="Rechercher un pays" placeholderTextColor="#9BAAA2" style={s.input} />
+          <TextInput value={countrySearch} onChangeText={setCountrySearch} placeholder="Rechercher un pays" placeholderTextColor={palette.placeholder} style={s.input} />
           <ScrollView style={s.countryList} keyboardShouldPersistTaps="handled">
             {filteredCountries.map(c => <Pressable key={c.code} onPress={() => setCountryCode(c.code)} style={[s.countryRow, countryCode === c.code && s.countrySelected]}>
               <View style={{flex:1}}><Text style={s.countryName}>{c.label}</Text><Text style={s.countryCurrency}>{c.currency}</Text></View>
@@ -93,13 +93,13 @@ export default function Onboarding() {
           <Text style={s.title}>Où gardes-tu ton argent ?</Text>
           <Text style={s.subtitle}>Choisis ton moyen principal. Tu pourras ajouter les autres portefeuilles ensuite.</Text>
           {([{value:"mobile_money",label:"Mobile Money",hint:"MTN, Moov, Celtiis, Orange Money"},{value:"cash",label:"Espèces",hint:"Argent gardé sur toi ou à la maison"},{value:"bank",label:"Compte bancaire",hint:"Compte dans une banque"}] as {value:AccountType;label:string;hint:string}[]).map(option=><Pressable key={option.value} onPress={()=>{setAccountType(option.value);setAccountName(option.value==="mobile_money"?"Mobile Money":option.value==="bank"?"Banque":"Espèces");}} style={[s.profileCard,accountType===option.value&&s.profileSelected]}><View style={{flex:1}}><Text style={s.profileTitle}>{option.label}</Text><Text style={s.profileDescription}>{option.hint}</Text></View><View style={[s.radio,accountType===option.value&&s.radioOn]}>{accountType===option.value&&<View style={s.radioDot}/>}</View></Pressable>)}
-          {accountType==="mobile_money"&&<TextInput value={accountName} onChangeText={setAccountName} placeholder="Ex. MTN Mobile Money" placeholderTextColor="#9BAAA2" style={s.input}/>}
+          {accountType==="mobile_money"&&<TextInput value={accountName} onChangeText={setAccountName} placeholder="Ex. MTN Mobile Money" placeholderTextColor={palette.placeholder} style={s.input}/>}
         </View>}
         {step === 4 && <View style={s.stepContent}>
           <Text style={s.eyebrow}>ON Y EST PRESQUE</Text>
           <Text style={s.title}>Combien as-tu actuellement ?</Text>
           <Text style={s.subtitle}>Indique ton solde de départ si tu le connais. Sinon, passe cette étape.</Text>
-          <View style={s.balanceInputWrap}><TextInput value={openingBalance} onChangeText={setOpeningBalance} placeholder="0" placeholderTextColor="#9BAAA2" keyboardType="decimal-pad" style={s.balanceInput}/><Text style={s.currencyCode}>{country.currency}</Text></View>
+          <View style={s.balanceInputWrap}><TextInput value={openingBalance} onChangeText={setOpeningBalance} placeholder="0" placeholderTextColor={palette.placeholder} keyboardType="decimal-pad" style={s.balanceInput}/><Text style={s.currencyCode}>{country.currency}</Text></View>
           <Text style={s.helper}>Ce montant initialise ton portefeuille {accountName.toLowerCase()}. Il ne sera pas compté comme un revenu.</Text>
           <View style={s.privacyCard}><Ionicons name="shield-checkmark" size={22} color={palette.primary} style={s.privacyIcon}/><Text style={s.privacyText}>Tes données financières restent sur ton téléphone. Aucun compte à créer.</Text></View>
         </View>}
