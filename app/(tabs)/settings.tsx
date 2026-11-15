@@ -98,7 +98,7 @@ export default function Settings() {
       <View style={s.panel}>
         <Text style={s.panelTitle}>Informations personnelles</Text>
         <Text style={s.label}>Nom affiché</Text>
-        <TextInput value={name} onChangeText={setName} placeholder="Ton prénom" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={name} onChangeText={setName} placeholder="Ton prénom" style={s.input} />
         <Text style={s.label}>Pays et devise</Text>
         <View style={s.countryGrid}>
           {COUNTRIES.map(c => <Pressable key={c.code} onPress={() => setCountryCode(c.code)} style={[s.country, countryCode === c.code && s.selected]}><Text style={s.optionText}>{c.label}</Text><Text style={s.optionHint}>{c.currency}</Text></Pressable>)}
@@ -113,9 +113,9 @@ export default function Settings() {
         <Text style={s.panelHint}>Espèces, banque, Mobile Money ou épargne. Chaque portefeuille garde son propre solde.</Text>
         {accounts.map(a => <View key={a.id} style={s.accountRow}><View style={{ flex: 1 }}><Text style={s.optionText}>{a.name}</Text><Text style={s.optionHint}>{accountOptions.find(x => x.value === a.type)?.label ?? a.type} · {a.currency}</Text></View><Pressable onPress={() => removeAccount(a)} style={s.delete}><Text style={s.deleteText}>Supprimer</Text></Pressable></View>)}
         <Text style={s.label}>Ajouter un portefeuille</Text>
-        <TextInput value={accountName} onChangeText={setAccountName} placeholder="Ex. MTN Mobile Money" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={accountName} onChangeText={setAccountName} placeholder="Ex. MTN Mobile Money" style={s.input} />
         <Text style={s.label}>Solde actuel (facultatif, {profile?.currency})</Text>
-        <TextInput value={openingBalance} onChangeText={setOpeningBalance} placeholder="0" keyboardType="decimal-pad" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={openingBalance} onChangeText={setOpeningBalance} placeholder="0" keyboardType="decimal-pad" style={s.input} />
         <View style={s.countryGrid}>{accountOptions.map(item => <Pressable key={item.value} onPress={() => setAccountType(item.value)} style={[s.country, accountType === item.value && s.selected]}><Text style={s.optionText}>{item.label}</Text></Pressable>)}</View>
         <Pressable onPress={addAccount} style={s.button}><Text style={s.buttonText}>Ajouter le portefeuille</Text></Pressable>
       </View>
