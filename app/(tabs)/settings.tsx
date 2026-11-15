@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Appearance, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { Alert, Appearance, LayoutAnimation, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
@@ -35,8 +35,8 @@ export default function Settings() {
   const [accountType, setAccountType] = useState<AccountType>("mobile_money");
   const [saving, setSaving] = useState(false);
   const [darkMode, setDarkMode] = useState(Appearance.getColorScheme() === "dark");
-  useEffect(() => { AsyncStorage.getItem("mon-budget-theme").then(value => { const dark = value === "dark"; setDarkMode(dark); Appearance.setColorScheme(dark ? "dark" : "light"); }); }, []);
-  async function changeTheme(value: boolean) { setDarkMode(value); await AsyncStorage.setItem("mon-budget-theme", value ? "dark" : "light"); Appearance.setColorScheme(value ? "dark" : "light"); }
+  useEffect(() => { let active = true; AsyncStorage.getItem("mon-budget-theme").then(value => { if (!active) return; const dark = value === "dark"; setDarkMode(dark); Appearance.setColorScheme(dark ? "dark" : "light"); }).catch(() => {}); return () => { active = false; }; }, []);
+  async function changeTheme(value: boolean) { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setDarkMode(value); Appearance.setColorScheme(value ? "dark" : "light"); try { await AsyncStorage.setItem("mon-budget-theme", value ? "dark" : "light"); } catch { Alert.alert("Préférence non enregistrée", "Le thème est appliqué, mais sa mémorisation a échoué."); } }
 
   const refresh = useCallback(() => {
     let active = true;
