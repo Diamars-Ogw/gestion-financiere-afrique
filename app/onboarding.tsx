@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, LayoutAnimation, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { amountToMinorUnits, ensureDefaultAccount, saveProfile } from "@/src/database/finance";
@@ -46,7 +47,7 @@ export default function Onboarding() {
       Alert.alert("Ton prénom", "Ajoute un prénom pour personnaliser ton espace.");
       return;
     }
-    if (step < steps.length - 1) setStep(step + 1);
+    if (step < steps.length - 1) { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setStep(step + 1); }
     else void finish();
   }
 
@@ -59,7 +60,7 @@ export default function Onboarding() {
       </View>
       <View style={s.body}>
         {step === 0 && <View style={s.stepContent}>
-          <View style={s.illustration}><Text style={s.illustrationEmoji}>👋</Text></View>
+          <View style={s.illustration}><Ionicons name="wallet" size={30} color={palette.primary}/></View>
           <Text style={s.eyebrow}>BIENVENUE</Text>
           <Text style={s.title}>Comment on t'appelle ?</Text>
           <Text style={s.subtitle}>On commence simplement. Tu pourras modifier ces informations plus tard.</Text>
@@ -100,11 +101,11 @@ export default function Onboarding() {
           <Text style={s.subtitle}>Indique ton solde de départ si tu le connais. Sinon, passe cette étape.</Text>
           <View style={s.balanceInputWrap}><TextInput value={openingBalance} onChangeText={setOpeningBalance} placeholder="0" placeholderTextColor="#9BAAA2" keyboardType="decimal-pad" style={s.balanceInput}/><Text style={s.currencyCode}>{country.currency}</Text></View>
           <Text style={s.helper}>Ce montant initialise ton portefeuille {accountName.toLowerCase()}. Il ne sera pas compté comme un revenu.</Text>
-          <View style={s.privacyCard}><Text style={s.privacyIcon}>🔒</Text><Text style={s.privacyText}>Tes données financières restent sur ton téléphone. Aucun compte à créer.</Text></View>
+          <View style={s.privacyCard}><Ionicons name="shield-checkmark" size={22} color={palette.primary} style={s.privacyIcon}/><Text style={s.privacyText}>Tes données financières restent sur ton téléphone. Aucun compte à créer.</Text></View>
         </View>}
       </View>
       <View style={s.footer}>
-        {step > 0 ? <Pressable onPress={() => setStep(step - 1)} style={s.backButton}><Text style={s.backText}>Retour</Text></Pressable> : <View style={{width:76}}/>}
+        {step > 0 ? <Pressable onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setStep(step - 1); }} style={s.backButton}><Text style={s.backText}>Retour</Text></Pressable> : <View style={{width:76}}/>}
         <Pressable onPress={next} style={s.nextButton}><Text style={s.nextText}>{step === steps.length - 1 ? "Créer mon espace" : "Suivant"}</Text><Text style={s.nextArrow}>→</Text></Pressable>
       </View>
     </View>
@@ -121,7 +122,7 @@ const s = StyleSheet.create({
   body:{flex:1,justifyContent:"center",paddingHorizontal:25},
   stepContent:{width:"100%"},
   illustration:{width:64,height:64,borderRadius:22,backgroundColor:palette.primarySoft,alignItems:"center",justifyContent:"center",marginBottom:25},
-  illustrationEmoji:{fontSize: 31},
+
   eyebrow:{color:palette.primary,fontSize: 12,fontWeight:"700",letterSpacing:1.6,marginBottom:12},
   title:{color:palette.ink,fontSize: 29,lineHeight:36,fontWeight:"900",letterSpacing:-0.7},
   subtitle:{color:palette.muted,fontSize: 15,lineHeight:22,marginTop:11,marginBottom:25},
