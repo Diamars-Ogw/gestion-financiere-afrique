@@ -76,9 +76,9 @@ export default function Debts() {
           <Pressable onPress={() => setDirection("i_owe")} style={[s.mode, direction === "i_owe" && s.modeActive]}><Text style={[s.modeText, direction === "i_owe" && s.modeTextActive]}>Je dois</Text></Pressable>
           <Pressable onPress={() => setDirection("owed_to_me")} style={[s.mode, direction === "owed_to_me" && s.modeActive]}><Text style={[s.modeText, direction === "owed_to_me" && s.modeTextActive]}>On me doit</Text></Pressable>
         </View>
-        <TextInput value={label} onChangeText={setLabel} placeholder="Intitulé (ex. Prêt familial)" style={s.input} />
-        <TextInput value={person} onChangeText={setPerson} placeholder="Personne concernée (facultatif)" style={s.input} />
-        <TextInput value={amount} onChangeText={setAmount} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={label} onChangeText={setLabel} placeholder="Intitulé (ex. Prêt familial)" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={person} onChangeText={setPerson} placeholder="Personne concernée (facultatif)" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={amount} onChangeText={setAmount} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
         <Pressable onPress={addDebt} disabled={busy} style={s.button}><Text style={s.buttonText}>{busy ? "En cours..." : "Enregistrer"}</Text></Pressable>
       </View>
       <Text style={s.sectionTitle}>Suivi des dettes</Text>
@@ -96,7 +96,7 @@ export default function Debts() {
         <Text style={s.selectedName}>{selected.label} · reste {formatMoney(selected.remainingMinor, currency)}</Text>
         <Text style={s.label}>Portefeuille utilisé ou crédité</Text>
         <View style={s.chips}>{accounts.map(a => <Pressable key={a.id} onPress={() => setAccountId(a.id)} style={[s.chip, accountId === a.id && s.chipActive]}><Text style={[s.chipText, accountId === a.id && s.chipTextActive]}>{a.name}</Text></Pressable>)}</View>
-        <TextInput value={payment} onChangeText={setPayment} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={payment} onChangeText={setPayment} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
         <Pressable onPress={payDebt} disabled={busy} style={s.button}><Text style={s.buttonText}>{busy ? "En cours..." : "Enregistrer le règlement"}</Text></Pressable>
       </View> : null}
     </ScrollView>
