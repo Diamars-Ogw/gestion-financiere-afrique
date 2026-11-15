@@ -21,7 +21,7 @@ export default function RootLayout() {
   }, []);
   if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) UIManager.setLayoutAnimationEnabledExperimental(true);
   return <SQLiteProvider databaseName="equilibre.db" onInit={initializeDatabase}>
-    <StatusBar style={scheme === "dark" ? "light" : "dark"} backgroundColor={palette.background} />
+    <StatusBar style={scheme === "dark" ? "light" : "dark"} backgroundColor={scheme === "dark" ? "#101713" : "#F4F7F2"} />
     <Stack screenOptions={{
       headerShown: false,
       contentStyle: { backgroundColor: palette.background },
