@@ -1,8 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-<defs><linearGradient id="wallet" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#DDF7EA"/></linearGradient><linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#B9F36A"/><stop offset="1" stop-color="#12C981"/></linearGradient></defs>
-<path d="M245 390 Q245 340 300 340 H700 Q755 340 755 395 V690 Q755 745 700 745 H300 Q245 745 245 690Z" fill="url(#wallet)"/>
-<path d="M270 410 H710 Q735 410 755 450 V505 H270Z" fill="#E9FFF2"/>
-<path d="M290 600 Q460 600 560 490 Q650 390 730 300 Q745 430 660 520 Q555 625 410 660 Q345 675 285 660Z" fill="url(#leaf)"/>
-<path d="M310 650 Q470 620 580 525" fill="none" stroke="#0B8F62" stroke-width="18" stroke-linecap="round"/>
-<rect x="610" y="560" width="145" height="115" rx="36" fill="#087F5B"/><circle cx="670" cy="618" r="19" fill="#E9FFF2"/>
+<defs><linearGradient id="wallet" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#DFF7E9"/></linearGradient><linearGradient id="line" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#D8FF9C"/><stop offset="1" stop-color="#68D99A"/></linearGradient></defs>
+<path d="M170 390 Q170 285 275 285 H750 Q855 285 855 390 V670 Q855 775 750 775 H275 Q170 775 170 670Z" fill="url(#wallet)"/>
+<path d="M215 385 H810 V465 H215Z" fill="#F4FFF8"/>
+<path d="M215 455 H810" stroke="#C6E9D4" stroke-width="12"/>
+<path d="M635 515 H850 Q885 515 885 550 V655 Q885 690 850 690 H635 Q600 690 600 655 V550 Q600 515 635 515Z" fill="#087A50"/>
+<circle cx="675" cy="602" r="22" fill="#DFF7E9"/>
+<path d="M285 585 L405 475 L505 535 L690 360" fill="none" stroke="url(#line)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M610 360 H690 V440" fill="none" stroke="#78DFA3" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
