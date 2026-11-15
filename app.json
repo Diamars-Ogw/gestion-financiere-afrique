@@ -17,7 +17,7 @@
       "package": "com.diamars.monequilibre",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-foreground.png",
-        "backgroundColor": "#087F5B"
+        "backgroundColor": "#075B3D"
       }
     },
     "plugins": [
