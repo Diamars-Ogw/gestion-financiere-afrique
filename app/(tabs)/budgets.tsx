@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, LayoutAnimation, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { formatMoney, amountToMinorUnits, listBudgets, saveBudget } from "@/src/database/finance";
@@ -71,7 +71,7 @@ export default function Budgets() {
         <Text style={s.formTitle}>Créer ou modifier un budget</Text>
         <Text style={s.label}>Catégorie</Text>
         <View style={s.categories}>
-          {categories.map(item => <Pressable key={item} onPress={() => setCategory(item)} style={[s.category, category === item && s.categoryActive]}><Text style={[s.categoryText, category === item && s.categoryTextActive]}>{item}</Text></Pressable>)}
+          {categories.map(item => <Pressable key={item} onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setCategory(item); }} style={[s.category, category === item && s.categoryActive]}><Text style={[s.categoryText, category === item && s.categoryTextActive]}>{item}</Text></Pressable>)}
         </View>
         <Text style={s.label}>Plafond mensuel ({currency})</Text>
         <TextInput value={limit} onChangeText={setLimit} keyboardType="decimal-pad" placeholder="Ex. 50000" style={s.input} />
