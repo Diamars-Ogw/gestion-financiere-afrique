@@ -107,12 +107,12 @@ export default function Goals() {
 
 const s = StyleSheet.create({
   page: { flex: 1, backgroundColor: palette.background },
-  content: { padding: 20, paddingTop: 58, paddingBottom: 40 },
-  title: { color: palette.ink, fontSize: 26, fontWeight: "800" },
+  content: { padding: 20, paddingTop: 28, paddingBottom: 40 },
+  title: { color: palette.ink, fontSize: 29, fontWeight: "800" },
   subtitle: { color: palette.muted, fontSize: 14, lineHeight: 19, marginTop: 8 },
-  form: { backgroundColor: palette.surface, borderRadius: 17, padding: 15, marginTop: 18 },
+  form: { backgroundColor: palette.surface, borderRadius: 22, padding: 15, marginTop: 18 },
   formTitle: { color: palette.ink, fontSize: 15, fontWeight: "800", marginBottom: 10 },
-  input: { backgroundColor: palette.background, borderWidth: 1, borderColor: palette.border, borderRadius: 11, padding: 13, color: palette.ink, marginTop: 9 },
+  input: { backgroundColor: palette.background, borderWidth: 1, borderColor: palette.border, borderRadius: 14, padding: 13, color: palette.ink, marginTop: 9 },
   button: { backgroundColor: palette.navy, borderRadius: 12, padding: 14, alignItems: "center", marginTop: 13 },
   buttonText: { color: "#FFFFFF", fontWeight: "800", fontSize: 14 },
   sectionTitle: { color: palette.ink, fontSize: 17, fontWeight: "800", marginTop: 25, marginBottom: 12 },
