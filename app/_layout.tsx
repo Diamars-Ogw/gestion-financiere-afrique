@@ -7,5 +7,14 @@ import { palette } from "@/src/constants/theme";
 
 Notifications.setNotificationHandler({ handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: false, shouldSetBadge: false }) });
 export default function RootLayout() {
-  return <SQLiteProvider databaseName="equilibre.db" onInit={initializeDatabase}><StatusBar style="dark" /><Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: palette.background } }} /></SQLiteProvider>;
+  return <SQLiteProvider databaseName="equilibre.db" onInit={initializeDatabase}>
+    <StatusBar style="dark" backgroundColor={palette.background} />
+    <Stack screenOptions={{
+      headerShown: false,
+      contentStyle: { backgroundColor: palette.background },
+      animation: "fade_from_bottom",
+      animationDuration: 260,
+      gestureEnabled: true
+    }} />
+  </SQLiteProvider>;
 }
