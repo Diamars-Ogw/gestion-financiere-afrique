@@ -8,7 +8,7 @@ export default function TabLayout() {
     headerShown: false,
     tabBarActiveTintColor: palette.primary,
     tabBarInactiveTintColor: "#91A098",
-    tabBarStyle: { height: 78, paddingTop: 9, paddingBottom: 11, borderTopColor: "#E8EDE7", backgroundColor: "#FFFFFF", elevation: 14, shadowColor: "#17352A", shadowOpacity: 0.08, shadowRadius: 18, shadowOffset: { width: 0, height: -5 } },
+    tabBarStyle: { height: 78, paddingTop: 9, paddingBottom: 11, borderTopColor: "#E8EDE7", backgroundColor:palette.surface, elevation: 14, shadowColor: "#17352A", shadowOpacity: 0.08, shadowRadius: 18, shadowOffset: { width: 0, height: -5 } },
     tabBarLabelStyle: { fontSize: 10, fontWeight: "700" },
     animation: "fade"
   }}>
