@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, LayoutAnimation, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { Ionicons } from "@expo/vector-icons";
@@ -68,6 +68,7 @@ export default function Transactions() {
   useFocusEffect(refresh);
 
   function changeMode(next: EntryMode) {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setMode(next);
     if (next !== "transfer") setCategory(categories[next][0]);
   }
