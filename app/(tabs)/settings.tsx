@@ -1,5 +1,7 @@
-import { useCallback, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Appearance, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { amountToMinorUnits, createAccount, deleteEmptyAccount, getProfile, listAccounts, updateProfileSettings } from "@/src/database/finance";
@@ -32,6 +34,9 @@ export default function Settings() {
   const [openingBalance, setOpeningBalance] = useState("");
   const [accountType, setAccountType] = useState<AccountType>("mobile_money");
   const [saving, setSaving] = useState(false);
+  const [darkMode, setDarkMode] = useState(Appearance.getColorScheme() === "dark");
+  useEffect(() => { AsyncStorage.getItem("mon-budget-theme").then(value => { const dark = value === "dark"; setDarkMode(dark); Appearance.setColorScheme(dark ? "dark" : "light"); }); }, []);
+  async function changeTheme(value: boolean) { setDarkMode(value); await AsyncStorage.setItem("mon-budget-theme", value ? "dark" : "light"); Appearance.setColorScheme(value ? "dark" : "light"); }
 
   const refresh = useCallback(() => {
     let active = true;
@@ -119,6 +124,10 @@ export default function Settings() {
         <Pressable onPress={addAccount} style={s.button}><Text style={s.buttonText}>Ajouter le portefeuille</Text></Pressable>
       </View>
       <View style={s.panel}>
+        <View style={s.appearanceRow}><View style={s.appearanceIcon}><Ionicons name={darkMode ? "moon" : "sunny"} size={20} color={palette.primary}/></View><View style={{flex:1}}><Text style={s.panelTitle}>Apparence</Text><Text style={s.panelHint}>{darkMode ? "Mode sombre sélectionné" : "Mode clair sélectionné"}</Text></View><Switch value={darkMode} onValueChange={changeTheme} trackColor={{false:"#D7E3DA",true:"#78C99B"}} thumbColor={darkMode?palette.primary:"#FFFFFF"}/></View>
+        <Text style={s.body}>Le choix est mémorisé sur cet appareil et appliqué à l'apparence système.</Text>
+      </View>
+      <View style={s.panel}>
         <Text style={s.panelTitle}>Confidentialité et fonctionnement</Text>
         <Text style={s.body}>Les opérations sont stockées dans une base SQLite sur cet appareil. Aucun compte en ligne ni serveur financier n'est requis pour les fonctions quotidiennes.</Text>
         <Text style={s.body}>Si tu changes de pays et de devise après avoir commencé à enregistrer des opérations, l'application bloque le changement pour éviter de mélanger des soldes exprimés dans des monnaies différentes.</Text>
@@ -150,5 +159,6 @@ const s = StyleSheet.create({
   accountRow: { flexDirection: "row", alignItems: "center", borderBottomWidth: 1, borderBottomColor: palette.border, paddingVertical: 11 },
   delete: { paddingVertical: 7, paddingHorizontal: 9, borderRadius: 8, backgroundColor: palette.background },
   deleteText: { color: palette.red, fontSize: 13, fontWeight: "800" },
+  appearanceRow:{flexDirection:"row",alignItems:"center",gap:12},appearanceIcon:{width:42,height:42,borderRadius:14,backgroundColor:palette.primarySoft,alignItems:"center",justifyContent:"center"},
   body: { color: palette.muted, fontSize: 13, lineHeight: 18, marginTop: 8 }
 });
