@@ -52,7 +52,7 @@ export default function Dashboard() {
       <View style={s.brandLine}><View style={s.brandMark}><Ionicons name="wallet" size={17} color="#FFFFFF"/></View><Text style={s.brand}>MON BUDGET</Text></View>
       <Pressable accessibilityRole="button" accessibilityLabel="Paramètres du profil" onPress={() => router.push("/(tabs)/settings")} style={s.avatar}><Ionicons name="person-outline" size={20} color={palette.primary}/></Pressable>
     </View>
-    <View style={s.greetingRow}><View><Text style={s.greeting}>Bonjour{profile?.displayName ? " " + profile.displayName : ""} 👋</Text><Text style={s.subtitle}>Voici où tu en es aujourd'hui.</Text></View><View style={s.statusDot}/></View>
+    <View style={s.greetingRow}><View><Text style={s.greeting}>Bonjour{profile?.displayName ? " " + profile.displayName : ""}</Text><Text style={s.subtitle}>Voici où tu en es aujourd'hui.</Text></View><View style={s.statusDot}/></View>
 
     <View style={s.balanceCard}>
       <View style={s.balanceTop}><Text style={s.balanceLabel}>SOLDE TOTAL DISPONIBLE</Text><View style={s.eye}><Ionicons name="eye-outline" size={17} color="#D6F2E2"/></View></View>
