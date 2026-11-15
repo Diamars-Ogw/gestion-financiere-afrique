@@ -84,7 +84,7 @@ export default function Assistant() {
   );
 }
 const s=StyleSheet.create({
- page:{flex:1,backgroundColor:palette.background},content:{padding:20,paddingTop:58,paddingBottom:40},eyebrow:{color:palette.primary,fontSize: 13,fontWeight:"800",letterSpacing:1.2},title:{color:palette.ink,fontSize: 25,fontWeight:"800",marginTop:7},subtitle:{color:palette.muted,fontSize: 14,lineHeight:19,marginTop:8},
- summary:{backgroundColor:palette.navy,borderRadius:17,padding:17,marginTop:19},summaryLabel:{color:palette.surfaceMuted,fontSize: 13,fontWeight:"700",marginBottom:10},summaryRow:{flexDirection:"row",justifyContent:"space-between",paddingVertical:6},summaryText:{color:palette.surfaceSoft,fontSize: 13},summaryValue:{color:"#FFFFFF",fontSize: 14,fontWeight:"800"},
+ page:{flex:1,backgroundColor:palette.background},content:{padding:20,paddingTop:58,paddingBottom:40},eyebrow:{color:palette.primary,fontSize: 13,fontWeight:"800",letterSpacing:1.2},title:{color:palette.ink,fontSize: 28,fontWeight:"800",marginTop:7},subtitle:{color:palette.muted,fontSize: 14,lineHeight:19,marginTop:8},
+ summary:{backgroundColor:palette.navy,borderRadius:22,padding:17,marginTop:19},summaryLabel:{color:palette.surfaceMuted,fontSize: 13,fontWeight:"700",marginBottom:10},summaryRow:{flexDirection:"row",justifyContent:"space-between",paddingVertical:6},summaryText:{color:palette.surfaceSoft,fontSize: 13},summaryValue:{color:"#FFFFFF",fontSize: 14,fontWeight:"800"},
  sectionTitle:{color:palette.ink,fontSize: 17,fontWeight:"800",marginTop:24,marginBottom:11},card:{backgroundColor:palette.surface,borderWidth:1,borderColor:palette.border,borderRadius:14,padding:15,marginBottom:9},warning:{borderColor:palette.red},success:{borderColor:palette.green},cardTitle:{color:palette.ink,fontSize: 14,fontWeight:"800"},cardBody:{color:palette.muted,fontSize: 13,lineHeight:18,marginTop:6},footnote:{color:palette.muted,fontSize: 13,lineHeight:15,marginTop:12}
 });
