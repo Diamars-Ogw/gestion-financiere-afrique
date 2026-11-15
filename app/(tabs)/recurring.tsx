@@ -76,14 +76,14 @@ export default function Calendar() {
           <Pressable onPress={() => { setType("expense"); setCategory(expenseCategories[0]); }} style={[s.mode, type === "expense" && s.modeActive]}><Text style={[s.modeText, type === "expense" && s.modeTextActive]}>Dépense</Text></Pressable>
           <Pressable onPress={() => { setType("income"); setCategory(incomeCategories[0]); }} style={[s.mode, type === "income" && s.modeActive]}><Text style={[s.modeText, type === "income" && s.modeTextActive]}>Revenu</Text></Pressable>
         </View>
-        <TextInput value={label} onChangeText={setLabel} placeholder="Ex. Facture Internet" style={s.input} />
-        <TextInput value={amount} onChangeText={setAmount} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={label} onChangeText={setLabel} placeholder="Ex. Facture Internet" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={amount} onChangeText={setAmount} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
         <Text style={s.label}>Catégorie</Text>
         <View style={s.chips}>{categories.map(c => <Pressable key={c} onPress={() => setCategory(c)} style={[s.chip, category === c && s.chipActive]}><Text style={[s.chipText, category === c && s.chipTextActive]}>{c}</Text></Pressable>)}</View>
         <Text style={s.label}>Fréquence</Text>
         <View style={s.chips}>{([{value:"weekly",label:"Chaque semaine"},{value:"monthly",label:"Chaque mois"},{value:"yearly",label:"Chaque année"}] as {value:RecurringFrequency;label:string}[]).map(x => <Pressable key={x.value} onPress={() => setFrequency(x.value)} style={[s.chip, frequency === x.value && s.chipActive]}><Text style={[s.chipText, frequency === x.value && s.chipTextActive]}>{x.label}</Text></Pressable>)}</View>
         <Text style={s.label}>Prochaine date (AAAA-MM-JJ)</Text>
-        <TextInput value={dueDate} onChangeText={setDueDate} placeholder="2026-12-01" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={dueDate} onChangeText={setDueDate} placeholder="2026-12-01" style={s.input} />
         <Pressable onPress={addRule} disabled={busy} style={s.button}><Text style={s.buttonText}>{busy ? "En cours..." : "Enregistrer l'échéance"}</Text></Pressable>
       </View>
       <Text style={s.sectionTitle}>Échéances enregistrées</Text>
