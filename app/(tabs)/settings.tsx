@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { Alert, Appearance, LayoutAnimation, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useCallback, useState } from "react";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
@@ -34,9 +33,6 @@ export default function Settings() {
   const [openingBalance, setOpeningBalance] = useState("");
   const [accountType, setAccountType] = useState<AccountType>("mobile_money");
   const [saving, setSaving] = useState(false);
-  const [darkMode, setDarkMode] = useState(Appearance.getColorScheme() === "dark");
-  useEffect(() => { let active = true; AsyncStorage.getItem("mon-budget-theme").then(value => { if (!active) return; const dark = value === "dark"; setDarkMode(dark); Appearance.setColorScheme(dark ? "dark" : "light"); }).catch(() => {}); return () => { active = false; }; }, []);
-  async function changeTheme(value: boolean) { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setDarkMode(value); Appearance.setColorScheme(value ? "dark" : "light"); try { await AsyncStorage.setItem("mon-budget-theme", value ? "dark" : "light"); } catch { Alert.alert("Préférence non enregistrée", "Le thème est appliqué, mais sa mémorisation a échoué."); } }
 
   const refresh = useCallback(() => {
     let active = true;
@@ -124,8 +120,8 @@ export default function Settings() {
         <Pressable onPress={addAccount} style={s.button}><Text style={s.buttonText}>Ajouter le portefeuille</Text></Pressable>
       </View>
       <View style={s.panel}>
-        <View style={s.appearanceRow}><View style={s.appearanceIcon}><Ionicons name={darkMode ? "moon" : "sunny"} size={20} color={palette.primary}/></View><View style={{flex:1}}><Text style={s.panelTitle}>Apparence</Text><Text style={s.panelHint}>{darkMode ? "Mode sombre sélectionné" : "Mode clair sélectionné"}</Text></View><Switch value={darkMode} onValueChange={changeTheme} trackColor={{false:"#D7E3DA",true:"#78C99B"}} thumbColor={darkMode?palette.primary:"#FFFFFF"}/></View>
-        <Text style={s.body}>Le choix est mémorisé sur cet appareil et appliqué à l'apparence système.</Text>
+        <View style={s.appearanceRow}><View style={s.appearanceIcon}><Ionicons name="sunny" size={20} color={palette.primary}/></View><View style={{flex:1}}><Text style={s.panelTitle}>Apparence</Text><Text style={s.panelHint}>Mode clair stable</Text></View></View>
+        <Text style={s.body}>Le mode clair est fixé pour garantir un contraste lisible sur tous les téléphones. Le mode sombre ne sera réactivé qu'après une vérification complète de chaque écran.</Text>
       </View>
       <View style={s.panel}>
         <Text style={s.panelTitle}>Confidentialité et fonctionnement</Text>
