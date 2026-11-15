@@ -74,7 +74,7 @@ export default function Budgets() {
           {categories.map(item => <Pressable key={item} onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setCategory(item); }} style={[s.category, category === item && s.categoryActive]}><Text style={[s.categoryText, category === item && s.categoryTextActive]}>{item}</Text></Pressable>)}
         </View>
         <Text style={s.label}>Plafond mensuel ({currency})</Text>
-        <TextInput value={limit} onChangeText={setLimit} keyboardType="decimal-pad" placeholder="Ex. 50000" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={limit} onChangeText={setLimit} keyboardType="decimal-pad" placeholder="Ex. 50000" style={s.input} />
         <Pressable onPress={submit} disabled={saving} style={[s.button, saving && { opacity: 0.6 }]}><Text style={s.buttonText}>{saving ? "Enregistrement..." : "Enregistrer le budget"}</Text></Pressable>
       </View>
       <Text style={s.sectionTitle}>Vos budgets · {month}</Text>
