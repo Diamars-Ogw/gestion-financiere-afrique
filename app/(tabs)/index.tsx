@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
+import { LayoutAnimation, ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { Ionicons } from "@expo/vector-icons";
@@ -36,7 +36,7 @@ export default function Dashboard() {
     const now = new Date();
     const month = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
     Promise.all([getProfile(db), listAccounts(db), listRecentTransactions(db, 4), getMonthTotals(db, month), getExpenseCategories(db, month)]).then(([p,a,t,m,c]) => {
-      if (active) { setProfile(p); setAccounts(a); setTransactions(t); setTotals(m); setCategories(c.slice(0,5)); }
+      if (active) { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setProfile(p); setAccounts(a); setTransactions(t); setTotals(m); setCategories(c.slice(0,5)); }
     }).catch(() => {});
     return () => { active = false; };
   }, [db]));
