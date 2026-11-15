@@ -1,15 +1,14 @@
 import { Tabs, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useColorScheme, View } from "react-native";
+import { View } from "react-native";
 import { palette } from "@/src/constants/theme";
 
 export default function TabLayout() {
-  const scheme = useColorScheme();
   return <Tabs screenOptions={{
     headerShown: false,
     tabBarActiveTintColor: palette.primary,
-    tabBarInactiveTintColor: scheme === "dark" ? "#A8B5AD" : "#718078",
-    tabBarStyle: { height: 78, paddingTop: 9, paddingBottom: 11, borderTopColor: scheme === "dark" ? "#34443A" : "#E2EAE2", backgroundColor:palette.surface, elevation: 14, shadowColor: "#17352A", shadowOpacity: 0.08, shadowRadius: 18, shadowOffset: { width: 0, height: -5 } },
+    tabBarInactiveTintColor: palette.muted,
+    tabBarStyle: { height: 78, paddingTop: 9, paddingBottom: 11, borderTopColor: palette.border, backgroundColor:palette.surface, elevation: 14, shadowColor: "#17352A", shadowOpacity: 0.08, shadowRadius: 18, shadowOffset: { width: 0, height: -5 } },
     tabBarLabelStyle: { fontSize: 10, fontWeight: "700" },
     animation: "fade"
   }}>
