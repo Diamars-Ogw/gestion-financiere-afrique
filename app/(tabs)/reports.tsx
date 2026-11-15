@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { LayoutAnimation, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { formatMoney, getExpenseCategories, getMonthlyHistory } from "@/src/database/finance";
@@ -13,7 +13,7 @@ export default function Reports() {
  const [history,setHistory]=useState<MonthRow[]>([]);
  const [categories,setCategories]=useState<CategoryRow[]>([]);
  const [currency,setCurrency]=useState("XOF");
- const refresh=useCallback(()=>{let active=true;const d=new Date();const month=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");Promise.all([getMonthlyHistory(db,6),getExpenseCategories(db,month),db.getFirstAsync<{currency:string}>("SELECT currency FROM profile WHERE id=1")]).then(([h,c,p])=>{if(active){setHistory(h);setCategories(c);setCurrency(p?.currency??"XOF");}});return()=>{active=false;};},[db]);
+ const refresh=useCallback(()=>{let active=true;const d=new Date();const month=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");Promise.all([getMonthlyHistory(db,6),getExpenseCategories(db,month),db.getFirstAsync<{currency:string}>("SELECT currency FROM profile WHERE id=1")]).then(([h,c,p])=>{if(active){LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);setHistory(h);setCategories(c);setCurrency(p?.currency??"XOF");}});return()=>{active=false;};},[db]);
  useFocusEffect(refresh);
  const income=history.reduce((n,x)=>n+x.income,0), expenses=history.reduce((n,x)=>n+x.expenses,0), net=income-expenses;
  const rate=income>0?Math.round(net/income*100):0;
