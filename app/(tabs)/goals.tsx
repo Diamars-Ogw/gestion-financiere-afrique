@@ -75,8 +75,8 @@ export default function Goals() {
       <Text style={s.subtitle}>Prépare un projet, une réserve d'urgence ou une dépense importante. Les versements déplacent réellement l'argent vers ton portefeuille Épargne.</Text>
       <View style={s.form}>
         <Text style={s.formTitle}>Créer un objectif</Text>
-        <TextInput value={name} onChangeText={setName} placeholder="Ex. Fonds d'urgence" style={s.input} />
-        <TextInput value={target} onChangeText={setTarget} placeholder={"Montant cible en " + currency} keyboardType="decimal-pad" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={name} onChangeText={setName} placeholder="Ex. Fonds d'urgence" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={target} onChangeText={setTarget} placeholder={"Montant cible en " + currency} keyboardType="decimal-pad" style={s.input} />
         <Pressable onPress={addGoal} disabled={busy} style={s.button}><Text style={s.buttonText}>{busy ? "En cours..." : "Créer l'objectif"}</Text></Pressable>
       </View>
       <Text style={s.sectionTitle}>Mes objectifs</Text>
@@ -98,7 +98,7 @@ export default function Goals() {
         <Text style={s.selectedName}>{goals.find(g => g.id === selectedGoal)?.name ?? "Sélectionne un objectif ci-dessus"}</Text>
         <Text style={s.label}>Depuis quel portefeuille ?</Text>
         <View style={s.chips}>{accounts.filter(a => a.type !== "savings").map(a => <Pressable key={a.id} onPress={() => setAccountId(a.id)} style={[s.chip, accountId === a.id && s.chipActive]}><Text style={[s.chipText, accountId === a.id && s.chipTextActive]}>{a.name}</Text></Pressable>)}</View>
-        <TextInput value={contribution} onChangeText={setContribution} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={contribution} onChangeText={setContribution} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
         <Pressable onPress={addContribution} disabled={busy} style={s.button}><Text style={s.buttonText}>{busy ? "En cours..." : "Verser sur cet objectif"}</Text></Pressable>
       </View> : null}
     </ScrollView>
