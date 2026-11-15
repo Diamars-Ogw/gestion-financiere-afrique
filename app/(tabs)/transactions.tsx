@@ -130,7 +130,7 @@ export default function Transactions() {
       </View>
       <View style={s.form}>
         <Text style={s.label}>Montant ({selectedCurrency})</Text>
-        <TextInput value={amount} onChangeText={value => setAmount(groupAmountInput(value))} placeholder="0" keyboardType="decimal-pad" style={s.amountInput} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={amount} onChangeText={value => setAmount(groupAmountInput(value))} placeholder="0" keyboardType="decimal-pad" style={s.amountInput} />
         <Text style={s.label}>{mode === "transfer" ? "Depuis le portefeuille" : "Portefeuille"}</Text>
         <View style={s.chips}>
           {accounts.map(a => <Pressable key={a.id} onPress={() => setAccountId(a.id)} style={[s.chip, accountId === a.id && s.chipActive]}><Text style={[s.chipText, accountId === a.id && s.chipTextActive]}>{a.name}</Text></Pressable>)}
@@ -148,7 +148,7 @@ export default function Transactions() {
           </View>
         </>}
         <Text style={s.label}>Note (facultatif)</Text>
-        <TextInput value={note} onChangeText={setNote} placeholder="Précision sur cette opération" style={s.noteInput} />
+        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={note} onChangeText={setNote} placeholder="Précision sur cette opération" style={s.noteInput} />
         <Pressable disabled={saving} onPress={submit} style={[s.submit, saving && { opacity: 0.6 }]}>
           <Text style={s.submitText}>{saving ? "Enregistrement..." : "Enregistrer l'opération"}</Text>
         </Pressable>
