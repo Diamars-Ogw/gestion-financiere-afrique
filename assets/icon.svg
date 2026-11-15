@@ -1,10 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0BA875"/><stop offset="1" stop-color="#034B38"/></linearGradient><linearGradient id="wallet" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#DDF7EA"/></linearGradient><linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#B9F36A"/><stop offset="1" stop-color="#12C981"/></linearGradient></defs>
-<rect width="1024" height="1024" fill="url(#bg)"/>
-<circle cx="180" cy="150" r="310" fill="#35D69A" opacity=".13"/><circle cx="900" cy="890" r="360" fill="#002F24" opacity=".22"/>
-<path d="M190 385 Q190 310 275 310 H760 Q825 310 825 385 V735 Q825 810 750 810 H250 Q175 810 175 735 V420 Q175 385 190 385Z" fill="url(#wallet)"/>
-<path d="M220 395 L700 395 Q775 395 800 445 L800 520 H220Z" fill="#E9FFF2"/>
-<path d="M230 610 Q460 610 570 480 Q680 350 800 215 Q820 395 710 505 Q575 640 390 690 Q300 715 220 700Z" fill="url(#leaf)"/>
-<path d="M240 680 Q470 655 590 525" fill="none" stroke="#0B8F62" stroke-width="20" stroke-linecap="round"/>
-<rect x="650" y="570" width="190" height="140" rx="44" fill="#087F5B"/><circle cx="730" cy="640" r="24" fill="#E9FFF2"/>
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16B978"/><stop offset=".52" stop-color="#087A50"/><stop offset="1" stop-color="#043E2D"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#DFF7E9"/></linearGradient>
+ <linearGradient id="coin" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#D8FF9C"/><stop offset="1" stop-color="#68D99A"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="24"/><feOffset dy="22"/><feComponentTransfer><feFuncA type="linear" slope=".24"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="1024" height="1024" rx="230" fill="url(#bg)"/>
+<circle cx="160" cy="145" r="330" fill="#A9F4C8" opacity=".10"/><circle cx="910" cy="900" r="390" fill="#002D20" opacity=".25"/>
+<path d="M190 365 Q190 270 285 270 H735 Q830 270 830 365 V690 Q830 785 735 785 H285 Q190 785 190 690Z" fill="#003F2C" opacity=".28" transform="translate(0 18)"/>
+<g filter="url(#shadow)">
+ <path d="M176 390 Q176 300 266 300 H758 Q848 300 848 390 V665 Q848 755 758 755 H266 Q176 755 176 665Z" fill="url(#glass)"/>
+ <path d="M220 385 Q220 350 270 350 H754 Q802 350 802 398 V465 H220Z" fill="#F4FFF8"/>
+ <path d="M220 452 H802" stroke="#C6E9D4" stroke-width="12"/>
+ <path d="M635 515 H842 Q875 515 875 550 V650 Q875 685 840 685 H635 Q600 685 600 650 V550 Q600 515 635 515Z" fill="#087A50"/>
+ <circle cx="676" cy="600" r="22" fill="#DFF7E9"/>
+ <circle cx="735" cy="600" r="7" fill="#087A50"/>
+ <path d="M290 580 L405 475 L500 530 L680 365" fill="none" stroke="url(#coin)" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+ <path d="M604 365 H680 V441" fill="none" stroke="#78DFA3" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<path d="M286 825 H738" stroke="#B7F2CF" stroke-width="16" stroke-linecap="round" opacity=".72"/>
 </svg>
