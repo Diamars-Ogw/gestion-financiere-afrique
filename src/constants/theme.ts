@@ -15,7 +15,7 @@ export const palette = {
   navySoft: "#0A6748",
   ink: "#142F25",
   muted: "#58685F",
-  placeholder: "#68776E",
+  placeholder: "#637168",
   background: "#F4F7F2",
   surface: "#FFFFFF",
   surfaceMuted: "#D5E5DA",
