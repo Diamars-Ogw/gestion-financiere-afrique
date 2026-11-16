@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Alert, KeyboardAvoidingView, LayoutAnimation, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, Keyboard, KeyboardAvoidingView, LayoutAnimation, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Text, TextInput } from "@/src/components/AppText";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -51,6 +51,7 @@ export default function Onboarding() {
       Alert.alert("Ton prénom", "Ajoute un prénom pour personnaliser ton espace.");
       return;
     }
+    Keyboard.dismiss();
     if (step < steps.length - 1) { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setStep(step + 1); }
     else void finish();
   }
@@ -110,7 +111,7 @@ export default function Onboarding() {
         </View>}
       </ScrollView>
       <View style={s.footer}>
-        {step > 0 ? <Pressable onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setStep(step - 1); }} style={s.backButton}><Text style={s.backText}>Retour</Text></Pressable> : <View style={{width:76}}/>}
+        {step > 0 ? <Pressable onPress={() => { Keyboard.dismiss(); LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setStep(step - 1); }} style={s.backButton}><Text style={s.backText}>Retour</Text></Pressable> : <View style={{width:76}}/>}
         <Pressable onPress={next} style={s.nextButton}><Text style={s.nextText}>{step === steps.length - 1 ? "Créer mon espace" : "Suivant"}</Text><Text style={s.nextArrow}>→</Text></Pressable>
       </View>
       </KeyboardAvoidingView>
