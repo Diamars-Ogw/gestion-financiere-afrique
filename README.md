@@ -38,12 +38,13 @@ Les deux francs CFA sont distingués : XOF pour l'Afrique de l'Ouest et XAF pour
 - Calendrier financier et rappels locaux facultatifs à 9 h.
 - Export et restauration d'un fichier de sauvegarde local, incluant les données transport et calendrier. Les anciennes sauvegardes Mon Équilibre restent reconnues.
 - Paramètres du profil et gestion des portefeuilles.
+- Thèmes clair et sombre au choix (Réglages > Apparence), police Plus Jakarta Sans embarquée, solde masquable, tableau de bord avec anneau d'épargne et graphique par catégorie.
 
 ## Vérifications automatisées
 
 GitHub Actions exécute :
 - npm run typecheck : vérification TypeScript.
-- npm test : tests des conversions monétaires et des dates.
+- npm test : tests des conversions monétaires, des dates et des contrastes des thèmes.
 - npm run check:bundle : export du bundle Android Expo.
 - Un rapport npm audit sur les dépendances.
 
@@ -52,7 +53,7 @@ GitHub Actions exécute :
 - Amélioration des fonctions de modification et de gestion de l'historique.
 - Import de sauvegarde plus strict et tests des migrations SQLite.
 - Vérification complète de l'accessibilité et des petites tailles d'écran.
-- Le thème clair est actuellement activé ; le thème sombre n'est pas encore disponible.
+- Valider le rendu des thèmes clair et sombre sur appareils Android et iPhone (palettes testées automatiquement pour le contraste).
 - Tests fonctionnels sur appareils Android et iPhone.
 - Configuration du projet EAS, compilation APK et préparation de la distribution.
 - Préparation de la distribution iOS, soumise aux exigences de signature et au programme développeur Apple.
@@ -66,6 +67,7 @@ GitHub Actions exécute :
 - expo-sqlite
 - expo-notifications
 - expo-file-system, expo-sharing et expo-document-picker
+- expo-linear-gradient, react-native-svg et @expo-google-fonts/plus-jakarta-sans (interface)
 
 ## Développement
 

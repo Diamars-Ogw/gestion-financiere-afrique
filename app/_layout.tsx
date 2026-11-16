@@ -1,22 +1,26 @@
-import { useEffect } from "react";
-import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { UIManager, Platform, Appearance } from "react-native";
+import { UIManager, Platform } from "react-native";
+import { useFonts } from "expo-font";
+import {
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold
+} from "@expo-google-fonts/plus-jakarta-sans";
 import * as Notifications from "expo-notifications";
 import { initializeDatabase } from "@/src/database/schema";
-import { palette } from "@/src/constants/theme";
+import { ThemeProvider, useTheme, useThemeController } from "@/src/components/ThemeProvider";
 
 Notifications.setNotificationHandler({ handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: false, shouldSetBadge: false }) });
 
-export default function RootLayout() {
-  useEffect(() => {
-    // Ignore the phone's system appearance: the app has one verified palette.
-    Appearance.setColorScheme("light");
-  }, []);
-  if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) UIManager.setLayoutAnimationEnabledExperimental(true);
+function RootStack() {
+  const palette = useTheme();
+  const { scheme } = useThemeController();
   return <SQLiteProvider databaseName="equilibre.db" onInit={initializeDatabase}>
-    <StatusBar style="dark" backgroundColor={palette.background} />
+    <StatusBar style={scheme === "dark" ? "light" : "dark"} />
     <Stack screenOptions={{
       headerShown: false,
       contentStyle: { backgroundColor: palette.background },
@@ -25,4 +29,18 @@ export default function RootLayout() {
       gestureEnabled: true
     }} />
   </SQLiteProvider>;
+}
+
+export default function RootLayout() {
+  // Police embarquée dans l'application : aucun accès réseau, rendu identique sur tous les téléphones.
+  const [fontsLoaded, fontError] = useFonts({
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold
+  });
+  if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) UIManager.setLayoutAnimationEnabledExperimental(true);
+  if (!fontsLoaded && !fontError) return null;
+  return <ThemeProvider><RootStack /></ThemeProvider>;
 }

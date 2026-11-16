@@ -1,10 +1,12 @@
-import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useCallback, useState, useMemo } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "@/src/components/AppText";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { getMonthTotals, getProfile, listBudgets, listDebts, listGoals, formatMoney } from "@/src/database/finance";
 import type { UserProfile } from "@/src/types/finance";
-import { palette } from "@/src/constants/theme";
+import type { Palette } from "@/src/constants/theme";
+import { useTheme } from "@/src/components/ThemeProvider";
 
 type Insight = { title: string; body: string; level: "info" | "warning" | "success" };
 
@@ -14,6 +16,8 @@ function monthKey() {
 }
 
 export default function Assistant() {
+  const palette = useTheme();
+  const s = useMemo(() => makeStyles(palette), [palette]);
   const db = useSQLiteContext();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [totals, setTotals] = useState({ income: 0, expenses: 0 });
@@ -83,8 +87,8 @@ export default function Assistant() {
     </ScrollView>
   );
 }
-const s=StyleSheet.create({
- page:{flex:1,backgroundColor:palette.background},content:{padding:20,paddingTop:58,paddingBottom:40},eyebrow:{color:palette.primary,fontSize: 13,fontWeight:"800",letterSpacing:1.2},title:{color:palette.ink,fontSize: 28,fontWeight:"800",marginTop:7},subtitle:{color:palette.muted,fontSize: 14,lineHeight:19,marginTop:8},
+const makeStyles = (palette: Palette) => StyleSheet.create({
+ page:{flex:1,backgroundColor:palette.background},content:{padding:20,paddingTop: 18,paddingBottom:40},eyebrow:{color:palette.primary,fontSize: 13,fontWeight:"800",letterSpacing:1.2},title:{color:palette.ink,fontSize: 28,fontWeight:"800",marginTop:7},subtitle:{color:palette.muted,fontSize: 14,lineHeight:19,marginTop:8},
  summary:{backgroundColor:palette.navy,borderRadius:22,padding:17,marginTop:19},summaryLabel:{color:palette.surfaceMuted,fontSize: 13,fontWeight:"700",marginBottom:10},summaryRow:{flexDirection:"row",justifyContent:"space-between",paddingVertical:6},summaryText:{color:palette.surfaceSoft,fontSize: 13},summaryValue:{color:"#FFFFFF",fontSize: 14,fontWeight:"800"},
  sectionTitle:{color:palette.ink,fontSize: 17,fontWeight:"800",marginTop:24,marginBottom:11},card:{backgroundColor:palette.surface,borderWidth:1,borderColor:palette.border,borderRadius:14,padding:15,marginBottom:9},warning:{borderColor:palette.red},success:{borderColor:palette.green},cardTitle:{color:palette.ink,fontSize: 14,fontWeight:"800"},cardBody:{color:palette.muted,fontSize: 13,lineHeight:18,marginTop:6},footnote:{color:palette.muted,fontSize: 13,lineHeight:15,marginTop:12}
 });

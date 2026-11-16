@@ -1,12 +1,14 @@
-import { useCallback, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useState, useMemo } from "react";
+import { Alert, LayoutAnimation, Pressable, ScrollView, StyleSheet, Switch, View } from "react-native";
+import { Text, TextInput } from "@/src/components/AppText";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { amountToMinorUnits, createAccount, deleteEmptyAccount, getProfile, listAccounts, updateProfileSettings } from "@/src/database/finance";
 import { COUNTRIES } from "@/src/constants/countries";
 import type { Account, AccountType, IncomeProfile, UserProfile } from "@/src/types/finance";
-import { palette } from "@/src/constants/theme";
+import type { Palette } from "@/src/constants/theme";
+import { useTheme, useThemeController } from "@/src/components/ThemeProvider";
 
 const incomeOptions: { value: IncomeProfile; label: string }[] = [
   { value: "regular", label: "Revenus réguliers" },
@@ -23,6 +25,8 @@ const accountOptions: { value: AccountType; label: string }[] = [
 ];
 
 export default function Settings() {
+  const palette = useTheme();
+  const s = useMemo(() => makeStyles(palette), [palette]);
   const db = useSQLiteContext();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -33,6 +37,8 @@ export default function Settings() {
   const [openingBalance, setOpeningBalance] = useState("");
   const [accountType, setAccountType] = useState<AccountType>("mobile_money");
   const [saving, setSaving] = useState(false);
+  const { scheme, setScheme } = useThemeController();
+  const darkMode = scheme === "dark";
 
   const refresh = useCallback(() => {
     let active = true;
@@ -98,7 +104,7 @@ export default function Settings() {
       <View style={s.panel}>
         <Text style={s.panelTitle}>Informations personnelles</Text>
         <Text style={s.label}>Nom affiché</Text>
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={name} onChangeText={setName} placeholder="Ton prénom" style={s.input} />
+        <TextInput value={name} onChangeText={setName} placeholder="Ton prénom" style={s.input} />
         <Text style={s.label}>Pays et devise</Text>
         <View style={s.countryGrid}>
           {COUNTRIES.map(c => <Pressable key={c.code} onPress={() => setCountryCode(c.code)} style={[s.country, countryCode === c.code && s.selected]}><Text style={s.optionText}>{c.label}</Text><Text style={s.optionHint}>{c.currency}</Text></Pressable>)}
@@ -113,15 +119,15 @@ export default function Settings() {
         <Text style={s.panelHint}>Espèces, banque, Mobile Money ou épargne. Chaque portefeuille garde son propre solde.</Text>
         {accounts.map(a => <View key={a.id} style={s.accountRow}><View style={{ flex: 1 }}><Text style={s.optionText}>{a.name}</Text><Text style={s.optionHint}>{accountOptions.find(x => x.value === a.type)?.label ?? a.type} · {a.currency}</Text></View><Pressable onPress={() => removeAccount(a)} style={s.delete}><Text style={s.deleteText}>Supprimer</Text></Pressable></View>)}
         <Text style={s.label}>Ajouter un portefeuille</Text>
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={accountName} onChangeText={setAccountName} placeholder="Ex. MTN Mobile Money" style={s.input} />
+        <TextInput value={accountName} onChangeText={setAccountName} placeholder="Ex. MTN Mobile Money" style={s.input} />
         <Text style={s.label}>Solde actuel (facultatif, {profile?.currency})</Text>
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={openingBalance} onChangeText={setOpeningBalance} placeholder="0" keyboardType="decimal-pad" style={s.input} />
+        <TextInput value={openingBalance} onChangeText={setOpeningBalance} placeholder="0" keyboardType="decimal-pad" style={s.input} />
         <View style={s.countryGrid}>{accountOptions.map(item => <Pressable key={item.value} onPress={() => setAccountType(item.value)} style={[s.country, accountType === item.value && s.selected]}><Text style={s.optionText}>{item.label}</Text></Pressable>)}</View>
         <Pressable onPress={addAccount} style={s.button}><Text style={s.buttonText}>Ajouter le portefeuille</Text></Pressable>
       </View>
       <View style={s.panel}>
-        <View style={s.appearanceRow}><View style={s.appearanceIcon}><Ionicons name="sunny" size={20} color={palette.primary}/></View><View style={{flex:1}}><Text style={s.panelTitle}>Apparence</Text><Text style={s.panelHint}>Mode clair stable</Text></View></View>
-        <Text style={s.body}>Le mode clair est fixé pour garantir un contraste lisible sur tous les téléphones. Le mode sombre ne sera réactivé qu'après une vérification complète de chaque écran.</Text>
+        <View style={s.appearanceRow}><View style={s.appearanceIcon}><Ionicons name={darkMode ? "moon" : "sunny"} size={20} color={palette.primary}/></View><View style={{flex:1}}><Text style={s.panelTitle}>Apparence</Text><Text style={s.panelHint}>{darkMode ? "Mode sombre activé" : "Mode clair activé"}</Text></View><Switch value={darkMode} onValueChange={value => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setScheme(value ? "dark" : "light"); }} trackColor={{false:"#D7E3DA",true:"#78C99B"}} thumbColor={darkMode?palette.primary:"#FFFFFF"}/></View>
+        <Text style={s.body}>Le choix est mémorisé sur cet appareil et s'applique à toute l'application.</Text>
       </View>
       <View style={s.panel}>
         <Text style={s.panelTitle}>Confidentialité et fonctionnement</Text>
@@ -132,9 +138,9 @@ export default function Settings() {
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = (palette: Palette) => StyleSheet.create({
   page: { flex: 1, backgroundColor: palette.background },
-  content: { padding: 20, paddingTop: 28, paddingBottom: 40 },
+  content: { padding: 20, paddingTop: 18, paddingBottom: 40 },
   title: { color: palette.ink, fontSize: 28, fontWeight: "800" },
   subtitle: { color: palette.muted, fontSize: 14, lineHeight: 19, marginTop: 8 },
   panel: { backgroundColor: palette.surface, borderRadius: 22, padding: 15, marginTop: 17 },

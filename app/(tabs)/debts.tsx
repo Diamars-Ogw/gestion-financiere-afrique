@@ -1,12 +1,16 @@
-import { useCallback, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useState, useMemo } from "react";
+import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text, TextInput } from "@/src/components/AppText";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { amountToMinorUnits, createDebt, formatMoney, listAccounts, listDebts, recordDebtPayment } from "@/src/database/finance";
 import type { Account, Debt, DebtDirection } from "@/src/types/finance";
-import { palette } from "@/src/constants/theme";
+import type { Palette } from "@/src/constants/theme";
+import { useTheme } from "@/src/components/ThemeProvider";
 
 export default function Debts() {
+  const palette = useTheme();
+  const s = useMemo(() => makeStyles(palette), [palette]);
   const db = useSQLiteContext();
   const [debts, setDebts] = useState<Debt[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -76,9 +80,9 @@ export default function Debts() {
           <Pressable onPress={() => setDirection("i_owe")} style={[s.mode, direction === "i_owe" && s.modeActive]}><Text style={[s.modeText, direction === "i_owe" && s.modeTextActive]}>Je dois</Text></Pressable>
           <Pressable onPress={() => setDirection("owed_to_me")} style={[s.mode, direction === "owed_to_me" && s.modeActive]}><Text style={[s.modeText, direction === "owed_to_me" && s.modeTextActive]}>On me doit</Text></Pressable>
         </View>
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={label} onChangeText={setLabel} placeholder="Intitulé (ex. Prêt familial)" style={s.input} />
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={person} onChangeText={setPerson} placeholder="Personne concernée (facultatif)" style={s.input} />
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={amount} onChangeText={setAmount} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
+        <TextInput value={label} onChangeText={setLabel} placeholder="Intitulé (ex. Prêt familial)" style={s.input} />
+        <TextInput value={person} onChangeText={setPerson} placeholder="Personne concernée (facultatif)" style={s.input} />
+        <TextInput value={amount} onChangeText={setAmount} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
         <Pressable onPress={addDebt} disabled={busy} style={s.button}><Text style={s.buttonText}>{busy ? "En cours..." : "Enregistrer"}</Text></Pressable>
       </View>
       <Text style={s.sectionTitle}>Suivi des dettes</Text>
@@ -96,14 +100,14 @@ export default function Debts() {
         <Text style={s.selectedName}>{selected.label} · reste {formatMoney(selected.remainingMinor, currency)}</Text>
         <Text style={s.label}>Portefeuille utilisé ou crédité</Text>
         <View style={s.chips}>{accounts.map(a => <Pressable key={a.id} onPress={() => setAccountId(a.id)} style={[s.chip, accountId === a.id && s.chipActive]}><Text style={[s.chipText, accountId === a.id && s.chipTextActive]}>{a.name}</Text></Pressable>)}</View>
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={payment} onChangeText={setPayment} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
+        <TextInput value={payment} onChangeText={setPayment} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
         <Pressable onPress={payDebt} disabled={busy} style={s.button}><Text style={s.buttonText}>{busy ? "En cours..." : "Enregistrer le règlement"}</Text></Pressable>
       </View> : null}
     </ScrollView>
   );
 }
-const s=StyleSheet.create({
-  page:{flex:1,backgroundColor:palette.background},content:{padding:20,paddingTop:58,paddingBottom:40},
+const makeStyles = (palette: Palette) => StyleSheet.create({
+  page:{flex:1,backgroundColor:palette.background},content:{padding:20,paddingTop: 18,paddingBottom:40},
   title:{color:palette.ink,fontSize: 29,fontWeight:"800"},subtitle:{color:palette.muted,fontSize: 14,lineHeight:19,marginTop:8},
   form:{backgroundColor:palette.surface,borderRadius:22,padding:15,marginTop:18},formTitle:{color:palette.ink,fontSize: 15,fontWeight:"800",marginBottom:10},
   modeRow:{flexDirection:"row",backgroundColor:palette.background,borderRadius:14,padding:4,marginTop:8},mode:{flex:1,padding:10,alignItems:"center",borderRadius:8},modeActive:{backgroundColor:palette.navy},modeText:{color:palette.muted,fontSize: 13,fontWeight:"700"},modeTextActive:{color:"#FFFFFF"},

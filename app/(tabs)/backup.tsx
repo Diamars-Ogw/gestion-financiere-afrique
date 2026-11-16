@@ -1,14 +1,18 @@
-import { useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState, useMemo } from "react";
+import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "@/src/components/AppText";
 import { useSQLiteContext } from "expo-sqlite";
 import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import * as Notifications from "expo-notifications";
 import { createBackupData, restoreBackupData } from "@/src/database/finance";
-import { palette } from "@/src/constants/theme";
+import type { Palette } from "@/src/constants/theme";
+import { useTheme } from "@/src/components/ThemeProvider";
 
 export default function Backup() {
+  const palette = useTheme();
+  const s = useMemo(() => makeStyles(palette), [palette]);
   const db = useSQLiteContext();
   const [busy, setBusy] = useState(false);
 
@@ -78,7 +82,7 @@ export default function Backup() {
     </ScrollView>
   );
 }
-const s=StyleSheet.create({
- page:{flex:1,backgroundColor:palette.background},content:{padding:20,paddingTop:58,paddingBottom:40},title:{color:palette.ink,fontSize: 28,fontWeight:"800"},subtitle:{color:palette.muted,fontSize: 14,lineHeight:19,marginTop:8},
+const makeStyles = (palette: Palette) => StyleSheet.create({
+ page:{flex:1,backgroundColor:palette.background},content:{padding:20,paddingTop: 18,paddingBottom:40},title:{color:palette.ink,fontSize: 28,fontWeight:"800"},subtitle:{color:palette.muted,fontSize: 14,lineHeight:19,marginTop:8},
  card:{backgroundColor:palette.surface,borderRadius:22,padding:16,marginTop:18},cardTitle:{color:palette.ink,fontSize: 15,fontWeight:"800"},body:{color:palette.muted,fontSize: 13,lineHeight:18,marginTop:8},button:{backgroundColor:palette.navy,borderRadius:14,padding:14,alignItems:"center",marginTop:15},buttonText:{color:"#FFFFFF",fontSize: 13,fontWeight:"800"},secondary:{borderWidth:1,borderColor:palette.primary,borderRadius:14,padding:13,alignItems:"center",marginTop:15},secondaryText:{color:palette.primary,fontSize: 13,fontWeight:"800"},notice:{backgroundColor:palette.primarySoft,borderRadius:14,padding:14,marginTop:17},noticeTitle:{color:palette.primary,fontSize: 14,fontWeight:"800"}
 });

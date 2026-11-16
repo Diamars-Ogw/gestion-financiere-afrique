@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
-import { Alert, LayoutAnimation, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useEffect, useState, useMemo } from "react";
+import { Alert, LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text, TextInput } from "@/src/components/AppText";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { Ionicons } from "@expo/vector-icons";
 import { amountToMinorUnits, createTransaction, formatMoney, listAccounts, listRecentTransactions, transferBetweenAccounts } from "@/src/database/finance";
 import type { Account, Transaction, TransactionType } from "@/src/types/finance";
-import { palette } from "@/src/constants/theme";
+import type { Palette } from "@/src/constants/theme";
+import { useTheme } from "@/src/components/ThemeProvider";
 
 type EntryMode = "income" | "expense" | "transfer";
 const categories = {
@@ -28,6 +30,8 @@ function displayDate(value: string) {
 }
 
 export default function Transactions() {
+  const palette = useTheme();
+  const s = useMemo(() => makeStyles(palette), [palette]);
   const db = useSQLiteContext();
   const params = useLocalSearchParams<{ type?: string }>();
   const [mode, setMode] = useState<EntryMode>(params.type === "income" ? "income" : "expense");
@@ -130,7 +134,7 @@ export default function Transactions() {
       </View>
       <View style={s.form}>
         <Text style={s.label}>Montant ({selectedCurrency})</Text>
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={amount} onChangeText={value => setAmount(groupAmountInput(value))} placeholder="0" keyboardType="decimal-pad" style={s.amountInput} />
+        <TextInput value={amount} onChangeText={value => setAmount(groupAmountInput(value))} placeholder="0" keyboardType="decimal-pad" style={s.amountInput} />
         <Text style={s.label}>{mode === "transfer" ? "Depuis le portefeuille" : "Portefeuille"}</Text>
         <View style={s.chips}>
           {accounts.map(a => <Pressable key={a.id} onPress={() => setAccountId(a.id)} style={[s.chip, accountId === a.id && s.chipActive]}><Text style={[s.chipText, accountId === a.id && s.chipTextActive]}>{a.name}</Text></Pressable>)}
@@ -148,7 +152,7 @@ export default function Transactions() {
           </View>
         </>}
         <Text style={s.label}>Note (facultatif)</Text>
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={note} onChangeText={setNote} placeholder="Précision sur cette opération" style={s.noteInput} />
+        <TextInput value={note} onChangeText={setNote} placeholder="Précision sur cette opération" style={s.noteInput} />
         <Pressable disabled={saving} onPress={submit} style={[s.submit, saving && { opacity: 0.6 }]}>
           <Text style={s.submitText}>{saving ? "Enregistrement..." : "Enregistrer l'opération"}</Text>
         </Pressable>
@@ -165,9 +169,9 @@ export default function Transactions() {
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = (palette: Palette) => StyleSheet.create({
   page: { flex: 1, backgroundColor: palette.background },
-  content: { padding: 20, paddingTop: 28, paddingBottom: 40 },
+  content: { padding: 20, paddingTop: 18, paddingBottom: 40 },
   title: { fontSize: 29, fontWeight: "800", color: palette.ink },
   subtitle: { color: palette.muted, marginTop: 8, lineHeight: 21, fontSize: 14 },
   modeRow: { flexDirection: "row", backgroundColor: palette.surface, padding: 5, borderRadius: 14, marginTop: 20 },

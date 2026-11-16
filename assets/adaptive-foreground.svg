@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
 <defs><linearGradient id="wallet" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#DFF7E9"/></linearGradient><linearGradient id="line" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#D8FF9C"/><stop offset="1" stop-color="#68D99A"/></linearGradient></defs>
+<g transform="translate(512 512) scale(0.8) translate(-512 -512)">
 <path d="M170 390 Q170 285 275 285 H750 Q855 285 855 390 V670 Q855 775 750 775 H275 Q170 775 170 670Z" fill="url(#wallet)"/>
 <path d="M215 385 H810 V465 H215Z" fill="#F4FFF8"/>
 <path d="M215 455 H810" stroke="#C6E9D4" stroke-width="12"/>
@@ -7,4 +8,4 @@
 <circle cx="675" cy="602" r="22" fill="#DFF7E9"/>
 <path d="M285 585 L405 475 L505 535 L690 360" fill="none" stroke="url(#line)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M610 360 H690 V440" fill="none" stroke="#78DFA3" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+</g></svg>

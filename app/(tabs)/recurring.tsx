@@ -1,16 +1,20 @@
-import { useCallback, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useState, useMemo } from "react";
+import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text, TextInput } from "@/src/components/AppText";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { amountToMinorUnits, createRecurringRule, formatMoney, listAccounts, listRecurringRules, markRecurringRulePaid, toggleRecurringRule } from "@/src/database/finance";
 import type { Account, RecurringFrequency, RecurringRule } from "@/src/types/finance";
-import { palette } from "@/src/constants/theme";
+import type { Palette } from "@/src/constants/theme";
+import { useTheme } from "@/src/components/ThemeProvider";
 
 const expenseCategories = ["Loyer", "Électricité", "Eau", "Internet", "Téléphone", "Scolarité", "Abonnement", "Crédit", "Autre"];
 const incomeCategories = ["Salaire", "Pension", "Loyer reçu", "Contrat", "Autre revenu"];
 function todayLocal(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 
 export default function Calendar() {
+  const palette = useTheme();
+  const s = useMemo(() => makeStyles(palette), [palette]);
   const db = useSQLiteContext();
   const [rules, setRules] = useState<RecurringRule[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -76,14 +80,14 @@ export default function Calendar() {
           <Pressable onPress={() => { setType("expense"); setCategory(expenseCategories[0]); }} style={[s.mode, type === "expense" && s.modeActive]}><Text style={[s.modeText, type === "expense" && s.modeTextActive]}>Dépense</Text></Pressable>
           <Pressable onPress={() => { setType("income"); setCategory(incomeCategories[0]); }} style={[s.mode, type === "income" && s.modeActive]}><Text style={[s.modeText, type === "income" && s.modeTextActive]}>Revenu</Text></Pressable>
         </View>
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={label} onChangeText={setLabel} placeholder="Ex. Facture Internet" style={s.input} />
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={amount} onChangeText={setAmount} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
+        <TextInput value={label} onChangeText={setLabel} placeholder="Ex. Facture Internet" style={s.input} />
+        <TextInput value={amount} onChangeText={setAmount} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
         <Text style={s.label}>Catégorie</Text>
         <View style={s.chips}>{categories.map(c => <Pressable key={c} onPress={() => setCategory(c)} style={[s.chip, category === c && s.chipActive]}><Text style={[s.chipText, category === c && s.chipTextActive]}>{c}</Text></Pressable>)}</View>
         <Text style={s.label}>Fréquence</Text>
         <View style={s.chips}>{([{value:"weekly",label:"Chaque semaine"},{value:"monthly",label:"Chaque mois"},{value:"yearly",label:"Chaque année"}] as {value:RecurringFrequency;label:string}[]).map(x => <Pressable key={x.value} onPress={() => setFrequency(x.value)} style={[s.chip, frequency === x.value && s.chipActive]}><Text style={[s.chipText, frequency === x.value && s.chipTextActive]}>{x.label}</Text></Pressable>)}</View>
         <Text style={s.label}>Prochaine date (AAAA-MM-JJ)</Text>
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={dueDate} onChangeText={setDueDate} placeholder="2026-12-01" style={s.input} />
+        <TextInput value={dueDate} onChangeText={setDueDate} placeholder="2026-12-01" style={s.input} />
         <Pressable onPress={addRule} disabled={busy} style={s.button}><Text style={s.buttonText}>{busy ? "En cours..." : "Enregistrer l'échéance"}</Text></Pressable>
       </View>
       <Text style={s.sectionTitle}>Échéances enregistrées</Text>
@@ -100,8 +104,8 @@ export default function Calendar() {
     </ScrollView>
   );
 }
-const s=StyleSheet.create({
- page:{flex:1,backgroundColor:palette.background},content:{padding:20,paddingTop:58,paddingBottom:40},title:{color:palette.ink,fontSize: 28,fontWeight:"800"},subtitle:{color:palette.muted,fontSize: 14,lineHeight:19,marginTop:8},
+const makeStyles = (palette: Palette) => StyleSheet.create({
+ page:{flex:1,backgroundColor:palette.background},content:{padding:20,paddingTop: 18,paddingBottom:40},title:{color:palette.ink,fontSize: 28,fontWeight:"800"},subtitle:{color:palette.muted,fontSize: 14,lineHeight:19,marginTop:8},
  form:{backgroundColor:palette.surface,borderRadius:22,padding:15,marginTop:18},formTitle:{color:palette.ink,fontSize: 15,fontWeight:"800"},modeRow:{flexDirection:"row",backgroundColor:palette.background,borderRadius:14,padding:4,marginTop:12},mode:{flex:1,padding:10,alignItems:"center",borderRadius:8},modeActive:{backgroundColor:palette.navy},modeText:{color:palette.muted,fontSize: 13,fontWeight:"700"},modeTextActive:{color:"#FFFFFF"},
  input:{backgroundColor:palette.background,borderWidth:1,borderColor:palette.border,borderRadius:14,padding:12,color:palette.ink,fontSize: 14,marginTop:9},label:{color:palette.ink,fontSize: 13,fontWeight:"800",marginTop:14,marginBottom:7},chips:{flexDirection:"row",flexWrap:"wrap",gap:7},chip:{padding:9,borderRadius:9,borderWidth:1,borderColor:palette.border,backgroundColor:palette.background},chipActive:{borderColor:palette.primary,backgroundColor:palette.primarySoft},chipText:{color:palette.muted,fontSize: 13,fontWeight:"700"},chipTextActive:{color:palette.primary},
  button:{backgroundColor:palette.navy,borderRadius:14,padding:14,alignItems:"center",marginTop:15},buttonText:{color:"#FFFFFF",fontSize: 13,fontWeight:"800"},sectionTitle:{color:palette.ink,fontSize: 17,fontWeight:"800",marginTop:25,marginBottom:12},empty:{backgroundColor:palette.surface,borderRadius:15,padding:18},emptyTitle:{color:palette.ink,fontSize: 15,fontWeight:"800"},emptyText:{color:palette.muted,fontSize: 13,lineHeight:17,marginTop:6},

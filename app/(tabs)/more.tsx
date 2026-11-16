@@ -1,7 +1,10 @@
-import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
+import { useMemo } from "react";
+import { ScrollView, StyleSheet, View, Pressable } from "react-native";
+import { Text } from "@/src/components/AppText";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { palette } from "@/src/constants/theme";
+import type { Palette } from "@/src/constants/theme";
+import { useTheme } from "@/src/components/ThemeProvider";
 
 const groups = [
   { title: "Préparer l'avenir", items: [
@@ -22,6 +25,8 @@ const groups = [
 ];
 
 export default function More() {
+  const palette = useTheme();
+  const s = useMemo(() => makeStyles(palette), [palette]);
  return <ScrollView style={s.page} contentContainerStyle={s.content}>
   <Text style={s.kicker}>TON ESPACE</Text><Text style={s.title}>Plus de fonctionnalités</Text>
   <Text style={s.subtitle}>Les outils complémentaires sont regroupés ici pour garder l'accueil simple.</Text>
@@ -35,8 +40,8 @@ export default function More() {
   </View>)}
  </ScrollView>;
 }
-const s=StyleSheet.create({
- page:{flex:1,backgroundColor:palette.background},content:{padding:22,paddingTop:58,paddingBottom:40},kicker:{color:palette.primary,fontSize: 13,fontWeight: "800",letterSpacing:1.5},title:{color:palette.ink,fontSize:28,fontWeight: "800",marginTop:7},subtitle:{color:palette.muted,fontSize:15,lineHeight:23,marginTop:9,marginBottom:10},
+const makeStyles = (palette: Palette) => StyleSheet.create({
+ page:{flex:1,backgroundColor:palette.background},content:{padding:22,paddingTop: 18,paddingBottom:40},kicker:{color:palette.primary,fontSize: 13,fontWeight: "800",letterSpacing:1.5},title:{color:palette.ink,fontSize:28,fontWeight: "800",marginTop:7},subtitle:{color:palette.muted,fontSize:15,lineHeight:23,marginTop:9,marginBottom:10},
  groupTitle:{color:palette.ink,fontSize:17,fontWeight: "800",marginTop:23,marginBottom:11},panel:{backgroundColor:palette.surface,borderRadius:20,paddingHorizontal:15,borderWidth:1,borderColor:palette.border},
  item:{flexDirection:"row",alignItems:"center",paddingVertical:16,gap:13},separator:{borderTopWidth:1,borderTopColor:palette.border},icon:{width:44,height:44,borderRadius:15,backgroundColor:palette.primarySoft,alignItems:"center",justifyContent:"center"},itemTitle:{color:palette.ink,fontSize:15,fontWeight:"800"},hint:{color:palette.muted,fontSize: 13,lineHeight:17,marginTop:4}
 });

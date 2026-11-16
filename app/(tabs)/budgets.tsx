@@ -1,10 +1,12 @@
-import { useCallback, useState } from "react";
-import { Alert, LayoutAnimation, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useState, useMemo } from "react";
+import { Alert, LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text, TextInput } from "@/src/components/AppText";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { formatMoney, amountToMinorUnits, listBudgets, saveBudget } from "@/src/database/finance";
 import type { Budget } from "@/src/types/finance";
-import { palette } from "@/src/constants/theme";
+import type { Palette } from "@/src/constants/theme";
+import { useTheme } from "@/src/components/ThemeProvider";
 
 const categories = ["Alimentation", "Logement", "Transport", "Santé", "Éducation", "Factures", "Communication", "Famille", "Loisirs", "Autre dépense"];
 
@@ -14,6 +16,8 @@ function currentMonth() {
 }
 
 export default function Budgets() {
+  const palette = useTheme();
+  const s = useMemo(() => makeStyles(palette), [palette]);
   const db = useSQLiteContext();
   const month = currentMonth();
   const [budgets, setBudgets] = useState<Budget[]>([]);
@@ -74,7 +78,7 @@ export default function Budgets() {
           {categories.map(item => <Pressable key={item} onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setCategory(item); }} style={[s.category, category === item && s.categoryActive]}><Text style={[s.categoryText, category === item && s.categoryTextActive]}>{item}</Text></Pressable>)}
         </View>
         <Text style={s.label}>Plafond mensuel ({currency})</Text>
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={limit} onChangeText={setLimit} keyboardType="decimal-pad" placeholder="Ex. 50000" style={s.input} />
+        <TextInput value={limit} onChangeText={setLimit} keyboardType="decimal-pad" placeholder="Ex. 50000" style={s.input} />
         <Pressable onPress={submit} disabled={saving} style={[s.button, saving && { opacity: 0.6 }]}><Text style={s.buttonText}>{saving ? "Enregistrement..." : "Enregistrer le budget"}</Text></Pressable>
       </View>
       <Text style={s.sectionTitle}>Vos budgets · {month}</Text>
@@ -94,9 +98,9 @@ export default function Budgets() {
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = (palette: Palette) => StyleSheet.create({
   page: { flex: 1, backgroundColor: palette.background },
-  content: { padding: 20, paddingTop: 28, paddingBottom: 40 },
+  content: { padding: 20, paddingTop: 18, paddingBottom: 40 },
   title: { color: palette.ink, fontSize: 29, fontWeight: "800" },
   subtitle: { color: palette.muted, fontSize: 14, lineHeight: 19, marginTop: 8 },
   summary: { backgroundColor: palette.navy, borderRadius: 22, padding: 18, marginTop: 20 },

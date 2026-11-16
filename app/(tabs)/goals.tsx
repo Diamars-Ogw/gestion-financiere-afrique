@@ -1,12 +1,16 @@
-import { useCallback, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useState, useMemo } from "react";
+import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text, TextInput } from "@/src/components/AppText";
 import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { amountToMinorUnits, contributeToGoal, createGoal, formatMoney, listAccounts, listGoals } from "@/src/database/finance";
 import type { Account, SavingsGoal } from "@/src/types/finance";
-import { palette } from "@/src/constants/theme";
+import type { Palette } from "@/src/constants/theme";
+import { useTheme } from "@/src/components/ThemeProvider";
 
 export default function Goals() {
+  const palette = useTheme();
+  const s = useMemo(() => makeStyles(palette), [palette]);
   const db = useSQLiteContext();
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -75,8 +79,8 @@ export default function Goals() {
       <Text style={s.subtitle}>Prépare un projet, une réserve d'urgence ou une dépense importante. Les versements déplacent réellement l'argent vers ton portefeuille Épargne.</Text>
       <View style={s.form}>
         <Text style={s.formTitle}>Créer un objectif</Text>
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={name} onChangeText={setName} placeholder="Ex. Fonds d'urgence" style={s.input} />
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={target} onChangeText={setTarget} placeholder={"Montant cible en " + currency} keyboardType="decimal-pad" style={s.input} />
+        <TextInput value={name} onChangeText={setName} placeholder="Ex. Fonds d'urgence" style={s.input} />
+        <TextInput value={target} onChangeText={setTarget} placeholder={"Montant cible en " + currency} keyboardType="decimal-pad" style={s.input} />
         <Pressable onPress={addGoal} disabled={busy} style={s.button}><Text style={s.buttonText}>{busy ? "En cours..." : "Créer l'objectif"}</Text></Pressable>
       </View>
       <Text style={s.sectionTitle}>Mes objectifs</Text>
@@ -98,16 +102,16 @@ export default function Goals() {
         <Text style={s.selectedName}>{goals.find(g => g.id === selectedGoal)?.name ?? "Sélectionne un objectif ci-dessus"}</Text>
         <Text style={s.label}>Depuis quel portefeuille ?</Text>
         <View style={s.chips}>{accounts.filter(a => a.type !== "savings").map(a => <Pressable key={a.id} onPress={() => setAccountId(a.id)} style={[s.chip, accountId === a.id && s.chipActive]}><Text style={[s.chipText, accountId === a.id && s.chipTextActive]}>{a.name}</Text></Pressable>)}</View>
-        <TextInput placeholderTextColor={palette.placeholder} selectionColor={palette.primary} value={contribution} onChangeText={setContribution} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
+        <TextInput value={contribution} onChangeText={setContribution} placeholder={"Montant en " + currency} keyboardType="decimal-pad" style={s.input} />
         <Pressable onPress={addContribution} disabled={busy} style={s.button}><Text style={s.buttonText}>{busy ? "En cours..." : "Verser sur cet objectif"}</Text></Pressable>
       </View> : null}
     </ScrollView>
   );
 }
 
-const s = StyleSheet.create({
+const makeStyles = (palette: Palette) => StyleSheet.create({
   page: { flex: 1, backgroundColor: palette.background },
-  content: { padding: 20, paddingTop: 28, paddingBottom: 40 },
+  content: { padding: 20, paddingTop: 18, paddingBottom: 40 },
   title: { color: palette.ink, fontSize: 29, fontWeight: "800" },
   subtitle: { color: palette.muted, fontSize: 14, lineHeight: 19, marginTop: 8 },
   form: { backgroundColor: palette.surface, borderRadius: 22, padding: 15, marginTop: 18 },
