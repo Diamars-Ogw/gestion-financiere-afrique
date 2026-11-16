@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Alert, LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, Keyboard, KeyboardAvoidingView, LayoutAnimation, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Text, TextInput } from "@/src/components/AppText";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -51,6 +51,7 @@ export default function Onboarding() {
       Alert.alert("Ton prénom", "Ajoute un prénom pour personnaliser ton espace.");
       return;
     }
+    Keyboard.dismiss();
     if (step < steps.length - 1) { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setStep(step + 1); }
     else void finish();
   }
@@ -62,7 +63,8 @@ export default function Onboarding() {
         <Text style={s.stepText}>ÉTAPE {step + 1} SUR {steps.length}</Text>
         <View style={s.progressTrack}><View style={[s.progressFill, { width: ((step + 1) / steps.length * 100) + "%" as `${number}%` }]} /></View>
       </View>
-      <View style={s.body}>
+      <KeyboardAvoidingView style={s.contentArea} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      <ScrollView style={s.body} contentContainerStyle={s.bodyContent} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false}>
         {step === 0 && <View style={s.stepContent}>
           <View style={s.illustration}><Ionicons name="wallet" size={30} color={palette.primary}/></View>
           <Text style={s.eyebrow}>BIENVENUE</Text>
@@ -75,7 +77,7 @@ export default function Onboarding() {
           <Text style={s.title}>Tu vis dans quel pays ?</Text>
           <Text style={s.subtitle}>On adaptera automatiquement la devise. XOF et XAF restent bien distincts.</Text>
           <TextInput value={countrySearch} onChangeText={setCountrySearch} placeholder="Rechercher un pays" placeholderTextColor={palette.muted} style={s.input} />
-          <ScrollView style={s.countryList} keyboardShouldPersistTaps="handled">
+          <ScrollView style={s.countryList} keyboardShouldPersistTaps="handled" nestedScrollEnabled>
             {filteredCountries.map(c => <Pressable key={c.code} onPress={() => setCountryCode(c.code)} style={[s.countryRow, countryCode === c.code && s.countrySelected]}>
               <View style={{flex:1}}><Text style={s.countryName}>{c.label}</Text><Text style={s.countryCurrency}>{c.currency}</Text></View>
               {countryCode === c.code && <Text style={s.check}>✓</Text>}
@@ -107,11 +109,12 @@ export default function Onboarding() {
           <Text style={s.helper}>Ce montant initialise ton portefeuille {accountName.toLowerCase()}. Il ne sera pas compté comme un revenu.</Text>
           <View style={s.privacyCard}><Ionicons name="shield-checkmark" size={22} color={palette.primary} style={s.privacyIcon}/><Text style={s.privacyText}>Tes données financières restent sur ton téléphone. Aucun compte à créer.</Text></View>
         </View>}
-      </View>
+      </ScrollView>
       <View style={s.footer}>
-        {step > 0 ? <Pressable onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setStep(step - 1); }} style={s.backButton}><Text style={s.backText}>Retour</Text></Pressable> : <View style={{width:76}}/>}
+        {step > 0 ? <Pressable onPress={() => { Keyboard.dismiss(); LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setStep(step - 1); }} style={s.backButton}><Text style={s.backText}>Retour</Text></Pressable> : <View style={{width:76}}/>}
         <Pressable onPress={next} style={s.nextButton}><Text style={s.nextText}>{step === steps.length - 1 ? "Créer mon espace" : "Suivant"}</Text><Text style={s.nextArrow}>→</Text></Pressable>
       </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -123,7 +126,9 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
   stepText:{color:palette.muted,fontSize: 13,fontWeight:"700",letterSpacing:1,marginTop:27},
   progressTrack:{height:5,backgroundColor:palette.border,borderRadius:5,overflow:"hidden",marginTop:10},
   progressFill:{height:5,backgroundColor:palette.primary,borderRadius:5},
-  body:{flex:1,justifyContent:"center",paddingHorizontal:25},
+  contentArea:{flex:1},
+  body:{flex:1},
+  bodyContent:{flexGrow:1,justifyContent:"center",paddingHorizontal:25},
   stepContent:{width:"100%"},
   illustration:{width:64,height:64,borderRadius:22,backgroundColor:palette.primarySoft,alignItems:"center",justifyContent:"center",marginBottom:25},
 
