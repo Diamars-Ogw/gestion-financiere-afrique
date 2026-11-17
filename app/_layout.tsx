@@ -13,8 +13,11 @@ import {
 import * as Notifications from "expo-notifications";
 import { initializeDatabase } from "@/src/database/schema";
 import { ThemeProvider, useTheme, useThemeController } from "@/src/components/ThemeProvider";
+import PwaInstallPrompt from "@/src/components/PwaInstallPrompt";
 
-Notifications.setNotificationHandler({ handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: false, shouldSetBadge: false }) });
+if (Platform.OS !== "web") {
+  Notifications.setNotificationHandler({ handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: false, shouldSetBadge: false }) });
+}
 
 function RootStack() {
   const palette = useTheme();
