@@ -18,7 +18,9 @@ jobs:
       - run: npm install
       - run: npm run typecheck
       - run: npm test
+      - run: npm run icons:generate
       - run: npm run check:bundle
+      - run: npm run build:web
       - name: Dependency security report
         run: npm audit --json > npm-audit.json || true
       - name: Summarize dependency security report
