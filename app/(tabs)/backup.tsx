@@ -28,8 +28,10 @@ export default function Backup() {
         const link = document.createElement("a");
         link.href = url;
         link.download = filename;
+        document.body.appendChild(link);
         link.click();
-        URL.revokeObjectURL(url);
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
         return;
       }
       const file = new File(Paths.cache, filename);
