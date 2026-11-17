@@ -1,5 +1,6 @@
 import { useCallback, useState, useMemo } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Alert } from "@/src/utils/alert";
 import { Text, TextInput } from "@/src/components/AppText";
 import * as Notifications from "expo-notifications";
 import {useFocusEffect} from "expo-router";
