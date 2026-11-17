@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Alert } from "@/src/utils/alert";
 import { Text } from "@/src/components/AppText";
 import { useSQLiteContext } from "expo-sqlite";
@@ -22,7 +22,7 @@ export default function Backup() {
     try {
       const backup = await createBackupData(db);
       const filename = "mon-budget-sauvegarde-" + new Date().toISOString().slice(0,10) + ".json";
-      const file = new File(Paths.cache, filename);
+      if (Platform.OS === "web") {\n        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });\n        const url = URL.createObjectURL(blob);\n        const link = document.createElement("a");\n        link.href = url;\n        link.download = filename;\n        link.click();\n        URL.revokeObjectURL(url);\n        return;\n      }\n      const file = new File(Paths.cache, filename);
       if (file.exists) file.delete();
       file.create();
       await file.write(JSON.stringify(backup, null, 2));
