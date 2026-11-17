@@ -86,8 +86,8 @@ export default function PwaInstallPrompt() {
           <Text style={[styles.description, { color: palette.muted }]}>
             {instructions
               ? ios
-                ? "Dans Safari, touche le bouton Partager, fais défiler les options, choisis « Sur l’écran d’accueil », puis touche « Ajouter »."
-                : "Ouvre le menu de ton navigateur (⋮ ou ⋯), puis choisis « Installer l’application » ou « Ajouter à l’écran d’accueil »."
+                ? "Sur iPhone, ouvre cette page dans Safari. Touche Partager, fais défiler les options, choisis « Sur l’écran d’accueil », puis touche « Ajouter »."
+                : "Si tu es dans WhatsApp ou une autre application, ouvre d’abord ce lien dans Chrome. Dans le menu ⋮, choisis « Installer l’application » ou « Ajouter à l’écran d’accueil »."
               : "Ajoute Mon Budget à l’écran d’accueil pour l’ouvrir comme une application, sans rechercher le lien à chaque fois."}
           </Text>
           {instructions ? (
