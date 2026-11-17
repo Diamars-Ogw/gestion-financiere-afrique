@@ -47,9 +47,10 @@ export default function Backup() {
     try {
       const result = await DocumentPicker.getDocumentAsync({ type: ["application/json", "text/json"], copyToCacheDirectory: true, multiple: false });
       if (result.canceled || !result.assets.length) return;
-      const file = new File(result.assets[0].uri);
       const browserFile = (result.assets[0] as typeof result.assets[number] & { file?: Blob }).file;
-      const backupText = Platform.OS === "web" && browserFile ? await browserFile.text() : await file.text();
+      const backupText = Platform.OS === "web" && browserFile
+        ? await browserFile.text()
+        : await new File(result.assets[0].uri).text();
       const backup = JSON.parse(backupText);
       Alert.alert(
         "Remplacer les données actuelles ?",
