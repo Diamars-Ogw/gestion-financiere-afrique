@@ -1,8 +1,9 @@
 import type { SQLiteDatabase } from "expo-sqlite";
+import { Platform } from "react-native";
 import type { Account, Transaction, UserProfile, TransactionType } from "@/src/types/finance";
 import { amountToMinorUnits, formatMoney } from "@/src/utils/money";
 import { isValidDateOnly } from "@/src/utils/date";
-export { amountToMinorUnits, formatMoney } from "@/src/utils/money";
+export { amountToMinorUnits, formatMoney } from "@/src/utils/money";\n\n// expo-sqlite does not support exclusive transactions on the web platform.\nasync function withAtomicTransaction(db: SQLiteDatabase, task: (transaction: SQLiteDatabase) => Promise<void>) {\n  if (Platform.OS === "web") {\n    await db.withTransactionAsync(() => task(db));\n    return;\n  }\n  await db.withExclusiveTransactionAsync(task);\n}
 
 export async function getProfile(db: SQLiteDatabase): Promise<UserProfile | null> {
   return db.getFirstAsync<UserProfile>("SELECT id, display_name AS displayName, country, currency, income_profile AS incomeProfile, onboarding_completed AS onboardingCompleted FROM profile WHERE id = 1");
@@ -50,7 +51,7 @@ export async function createTransaction(
   input: { accountId: number; type: Exclude<TransactionType, "transfer">; amountMinor: number; category: string; note?: string }
 ) {
   if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
-  await db.withExclusiveTransactionAsync(async txn => {
+  await withAtomicTransaction(db, async txn => {
     const account = await txn.getFirstAsync<{ id: number; balanceMinor: number }>("SELECT id, balance_minor AS balanceMinor FROM accounts WHERE id = ?", input.accountId);
     if (!account) throw new Error("Ce portefeuille n'existe plus.");
     await txn.runAsync(
@@ -68,7 +69,7 @@ export async function transferBetweenAccounts(
 ) {
   if (input.fromAccountId === input.toAccountId) throw new Error("Choisis deux portefeuilles différents.");
   if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
-  await db.withExclusiveTransactionAsync(async txn => {
+  await withAtomicTransaction(db, async txn => {
     const from = await txn.getFirstAsync<{ id: number; currency: string; balanceMinor: number }>("SELECT id, currency, balance_minor AS balanceMinor FROM accounts WHERE id = ?", input.fromAccountId);
     const to = await txn.getFirstAsync<{ id: number; currency: string }>("SELECT id, currency FROM accounts WHERE id = ?", input.toAccountId);
     if (!from || !to) throw new Error("Un des portefeuilles est introuvable.");
@@ -121,7 +122,7 @@ export async function createGoal(db: SQLiteDatabase, input: { name: string; targ
 
 export async function contributeToGoal(db: SQLiteDatabase, input: { goalId: number; accountId: number; amountMinor: number }) {
   if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
-  await db.withExclusiveTransactionAsync(async txn => {
+  await withAtomicTransaction(db, async txn => {
     const goal = await txn.getFirstAsync<{ id: number; name: string; targetMinor: number }>(
       "SELECT id, name, target_minor AS targetMinor FROM goals WHERE id = ?", input.goalId
     );
@@ -170,7 +171,7 @@ export async function updateProfileSettings(
       throw new Error("Tu as déjà des opérations ou des soldes dans " + current.currency + ". Pour éviter de mélanger deux devises, termine d'abord une sauvegarde et une conversion sécurisée de tes soldes.");
     }
   }
-  await db.withExclusiveTransactionAsync(async txn => {
+  await withAtomicTransaction(db, async txn => {
     await txn.runAsync(
       "UPDATE profile SET display_name = ?, country = ?, currency = ?, income_profile = ? WHERE id = 1",
       input.displayName.trim(), input.country, input.currency, input.incomeProfile
@@ -216,7 +217,7 @@ export async function createDebt(db: SQLiteDatabase, input: { label: string; per
 
 export async function recordDebtPayment(db: SQLiteDatabase, input: { debtId: number; accountId: number; amountMinor: number }) {
   if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
-  await db.withExclusiveTransactionAsync(async txn => {
+  await withAtomicTransaction(db, async txn => {
     const debt = await txn.getFirstAsync<{ id: number; label: string; direction: string; remainingMinor: number }>(
       "SELECT id, label, direction, remaining_minor AS remainingMinor FROM debts WHERE id = ?", input.debtId
     );
@@ -272,7 +273,7 @@ function advanceDueDate(dateValue: string, frequency: string) {
 }
 
 export async function markRecurringRulePaid(db: SQLiteDatabase, input: { ruleId: number; accountId: number }) {
-  await db.withExclusiveTransactionAsync(async txn => {
+  await withAtomicTransaction(db, async txn => {
     const rule = await txn.getFirstAsync<{ id: number; label: string; type: string; amountMinor: number; category: string; frequency: string; nextDueAt: string; isActive: number }>(
       "SELECT id, label, type, amount_minor AS amountMinor, category, frequency, next_due_at AS nextDueAt, is_active AS isActive FROM recurring_rules WHERE id = ?", input.ruleId
     );
@@ -334,7 +335,7 @@ export async function recordTransportExpense(db: SQLiteDatabase, input: { accoun
   if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor <= 0) throw new Error("Montant invalide.");
   if (input.kind === "fuel" && (input.liters == null || !Number.isFinite(input.liters) || input.liters <= 0)) throw new Error("Indique la quantité de carburant achetée.");
   if (input.odometerKm != null && (!Number.isSafeInteger(input.odometerKm) || input.odometerKm < 0)) throw new Error("Kilométrage invalide.");
-  await db.withExclusiveTransactionAsync(async txn => {
+  await withAtomicTransaction(db, async txn => {
     const account = await txn.getFirstAsync<{id:number; balanceMinor:number}>("SELECT id, balance_minor AS balanceMinor FROM accounts WHERE id=?",input.accountId);
     if (!account) throw new Error("Portefeuille introuvable.");
     if (account.balanceMinor < input.amountMinor) throw new Error("Solde insuffisant. Mets à jour ton solde de départ ou choisis un autre portefeuille.");
@@ -423,7 +424,7 @@ export async function restoreBackupData(db: SQLiteDatabase, backup: any) {
   if (!data.transportEntries.every((e: any) => transactionIds.has(e.transaction_id) && (e.vehicle_id == null || vehicleIds.has(e.vehicle_id)))) throw new Error("Une dépense de transport ne correspond pas à une opération valide.");
   if (!data.calendarEvents.every((e: any) => textValue(e.title) && textValue(e.due_date))) throw new Error("Un événement du calendrier est invalide.");
   if (!data.fuelPrices.every((f: any) => textValue(f.fuel_type) && integer(f.price_minor) && f.price_minor > 0 && textValue(f.effective_date))) throw new Error("Un prix de carburant est invalide.");
-  await db.withExclusiveTransactionAsync(async txn => {
+  await withAtomicTransaction(db, async txn => {
     await txn.runAsync("DELETE FROM transport_entries");
     await txn.runAsync("DELETE FROM calendar_events");
     await txn.runAsync("DELETE FROM fuel_prices");
