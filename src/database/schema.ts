@@ -2,8 +2,8 @@ import type { SQLiteDatabase } from "expo-sqlite";
 import { Platform } from "react-native";
 
 export async function initializeDatabase(db: SQLiteDatabase) {
+  if (Platform.OS !== "web") await db.execAsync("PRAGMA journal_mode = WAL;");
   await db.execAsync(`
-    PRAGMA journal_mode = WAL;
     PRAGMA foreign_keys = ON;
     CREATE TABLE IF NOT EXISTS profile (id INTEGER PRIMARY KEY NOT NULL CHECK (id = 1), display_name TEXT NOT NULL DEFAULT '', country TEXT NOT NULL DEFAULT 'BJ', currency TEXT NOT NULL DEFAULT 'XOF', income_profile TEXT NOT NULL DEFAULT 'regular', onboarding_completed INTEGER NOT NULL DEFAULT 0);
     CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, type TEXT NOT NULL, balance_minor INTEGER NOT NULL DEFAULT 0, currency TEXT NOT NULL DEFAULT 'XOF', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
