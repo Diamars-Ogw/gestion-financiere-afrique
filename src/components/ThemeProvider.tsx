@@ -15,11 +15,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
+    // Ne laisse jamais l'écran de démarrage bloqué si le stockage Web ne répond pas.
+    const fallback = setTimeout(() => { if (active) setReady(true); }, 2000);
     AsyncStorage.getItem(STORAGE_KEY)
       .then(value => { if (active && (value === "dark" || value === "light")) setSchemeState(value); })
       .catch(() => {})
       .finally(() => { if (active) setReady(true); });
-    return () => { active = false; };
+    return () => { active = false; clearTimeout(fallback); };
   }, []);
 
   // Garde les éléments natifs (alertes, sélecteurs) alignés sur le thème choisi.
