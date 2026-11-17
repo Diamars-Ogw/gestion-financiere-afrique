@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
-import { Alert, LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Alert } from "@/src/utils/alert";
 import { Text, TextInput } from "@/src/components/AppText";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
