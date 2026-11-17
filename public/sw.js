@@ -27,10 +27,10 @@ self.addEventListener("fetch", (event) => {
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
-        .then((response) => {
+        .then(async (response) => {
           if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put("/", copy));
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put("/", response.clone());
           }
           return response;
         })
