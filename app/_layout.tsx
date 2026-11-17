@@ -31,6 +31,7 @@ function RootStack() {
       animationDuration: 260,
       gestureEnabled: true
     }} />
+    <PwaInstallPrompt />
   </SQLiteProvider>;
 }
 
