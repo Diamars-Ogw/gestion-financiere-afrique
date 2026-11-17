@@ -22,7 +22,17 @@ export default function Backup() {
     try {
       const backup = await createBackupData(db);
       const filename = "mon-budget-sauvegarde-" + new Date().toISOString().slice(0,10) + ".json";
-      if (Platform.OS === "web") {\n        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });\n        const url = URL.createObjectURL(blob);\n        const link = document.createElement("a");\n        link.href = url;\n        link.download = filename;\n        link.click();\n        URL.revokeObjectURL(url);\n        return;\n      }\n      const file = new File(Paths.cache, filename);
+      if (Platform.OS === "web") {
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+      const file = new File(Paths.cache, filename);
       if (file.exists) file.delete();
       file.create();
       await file.write(JSON.stringify(backup, null, 2));
@@ -38,7 +48,9 @@ export default function Backup() {
       const result = await DocumentPicker.getDocumentAsync({ type: ["application/json", "text/json"], copyToCacheDirectory: true, multiple: false });
       if (result.canceled || !result.assets.length) return;
       const file = new File(result.assets[0].uri);
-      const backup = JSON.parse(await file.text());
+      const browserFile = (result.assets[0] as typeof result.assets[number] & { file?: Blob }).file;
+      const backupText = Platform.OS === "web" && browserFile ? await browserFile.text() : await file.text();
+      const backup = JSON.parse(backupText);
       Alert.alert(
         "Remplacer les données actuelles ?",
         "La restauration remplace les données financières actuelles. Les rappels locaux déjà programmés seront annulés et devront être recréés après la restauration. Fais une sauvegarde actuelle avant de continuer.",
@@ -48,9 +60,11 @@ export default function Backup() {
             setBusy(true);
             try {
               await restoreBackupData(db, backup);
-              const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-              for (const notification of scheduled) await Notifications.cancelScheduledNotificationAsync(notification.identifier);
-              Alert.alert("Restauration terminée", "Les données ont été restaurées. Les rappels locaux devront être reprogrammés.");
+              if (Platform.OS !== "web") {
+                const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+                for (const notification of scheduled) await Notifications.cancelScheduledNotificationAsync(notification.identifier);
+              }
+              Alert.alert("Restauration terminée", Platform.OS === "web" ? "Les données ont été restaurées." : "Les données ont été restaurées. Les rappels locaux devront être reprogrammés.");
             } catch (error) {
               Alert.alert("Restauration impossible", error instanceof Error ? error.message : "Une erreur est survenue.");
             } finally { setBusy(false); }
