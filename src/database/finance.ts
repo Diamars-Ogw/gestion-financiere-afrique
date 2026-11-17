@@ -3,7 +3,16 @@ import { Platform } from "react-native";
 import type { Account, Transaction, UserProfile, TransactionType } from "@/src/types/finance";
 import { amountToMinorUnits, formatMoney } from "@/src/utils/money";
 import { isValidDateOnly } from "@/src/utils/date";
-export { amountToMinorUnits, formatMoney } from "@/src/utils/money";\n\n// expo-sqlite does not support exclusive transactions on the web platform.\nasync function withAtomicTransaction(db: SQLiteDatabase, task: (transaction: SQLiteDatabase) => Promise<void>) {\n  if (Platform.OS === "web") {\n    await db.withTransactionAsync(() => task(db));\n    return;\n  }\n  await db.withExclusiveTransactionAsync(task);\n}
+export { amountToMinorUnits, formatMoney } from "@/src/utils/money";
+
+// expo-sqlite does not support exclusive transactions on the web platform.
+async function withAtomicTransaction(db: SQLiteDatabase, task: (transaction: SQLiteDatabase) => Promise<void>) {
+  if (Platform.OS === "web") {
+    await db.withTransactionAsync(() => task(db));
+    return;
+  }
+  await db.withExclusiveTransactionAsync(task);
+}
 
 export async function getProfile(db: SQLiteDatabase): Promise<UserProfile | null> {
   return db.getFirstAsync<UserProfile>("SELECT id, display_name AS displayName, country, currency, income_profile AS incomeProfile, onboarding_completed AS onboardingCompleted FROM profile WHERE id = 1");
