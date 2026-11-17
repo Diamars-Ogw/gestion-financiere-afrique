@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { Appearance } from "react-native";
+import { Appearance, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { darkPalette, lightPalette, type Palette } from "@/src/constants/theme";
 
@@ -25,7 +25,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Garde les éléments natifs (alertes, sélecteurs) alignés sur le thème choisi.
-  useEffect(() => { Appearance.setColorScheme(scheme); }, [scheme]);
+  useEffect(() => {
+    // React Native Web ne fournit pas Appearance.setColorScheme.
+    if (Platform.OS !== "web" && typeof Appearance.setColorScheme === "function") {
+      Appearance.setColorScheme(scheme);
+    }
+  }, [scheme]);
 
   const setScheme = useCallback((next: Scheme) => {
     setSchemeState(next);
