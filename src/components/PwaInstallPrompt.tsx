@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Modal, Platform, Pressable, StyleSheet, View } from "react-native";
+import { Image, Modal, Platform, Pressable, StyleSheet, View } from "react-native";
 import { Text } from "@/src/components/AppText";
 import { useTheme } from "@/src/components/ThemeProvider";
 
@@ -78,7 +78,7 @@ export default function PwaInstallPrompt() {
       <View style={styles.overlay}>
         <View style={[styles.card, { backgroundColor: palette.surface, borderColor: palette.border }]}>
           <View style={[styles.logo, { backgroundColor: palette.primarySoft }]}>
-            <Text style={[styles.logoText, { color: palette.primary }]}>MB</Text>
+            <Image source={{ uri: "/icons/icon-192.png" }} style={styles.logoImage} resizeMode="contain" />
           </View>
           <Text style={[styles.title, { color: palette.ink }]}>
             {instructions ? "Installer Mon Budget" : "Emporte ton budget partout"}
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 17
   },
-  logoText: { fontSize: 19, fontWeight: "800" },
+  logoImage: { width: 58, height: 58, borderRadius: 15 },
   title: { fontSize: 21, fontWeight: "800", textAlign: "center" },
   description: { fontSize: 14, lineHeight: 21, textAlign: "center", marginTop: 10, marginBottom: 20 },
   primaryButton: { width: "100%", borderRadius: 14, paddingVertical: 14, alignItems: "center" },
