@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Alert, Keyboard, KeyboardAvoidingView, LayoutAnimation, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Keyboard, KeyboardAvoidingView, LayoutAnimation, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Alert } from "@/src/utils/alert";
 import { Text, TextInput } from "@/src/components/AppText";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
