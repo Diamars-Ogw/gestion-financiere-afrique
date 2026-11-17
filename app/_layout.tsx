@@ -31,7 +31,6 @@ function RootStack() {
       animationDuration: 260,
       gestureEnabled: true
     }} />
-    <PwaInstallPrompt />
   </SQLiteProvider>;
 }
 
@@ -46,5 +45,5 @@ export default function RootLayout() {
   });
   if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) UIManager.setLayoutAnimationEnabledExperimental(true);
   if (!fontsLoaded && !fontError) return null;
-  return <ThemeProvider><RootStack /></ThemeProvider>;
+  return <ThemeProvider><><RootStack /><PwaInstallPrompt /></></ThemeProvider>;
 }
