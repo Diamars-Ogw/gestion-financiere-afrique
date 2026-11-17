@@ -1,4 +1,5 @@
 import type { SQLiteDatabase } from "expo-sqlite";
+import { Platform } from "react-native";
 
 export async function initializeDatabase(db: SQLiteDatabase) {
   await db.execAsync(`
