@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Alert } from "@/src/utils/alert";
 import { Text } from "@/src/components/AppText";
 import { useSQLiteContext } from "expo-sqlite";
 import { File, Paths } from "expo-file-system";
